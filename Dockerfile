@@ -21,15 +21,8 @@ RUN apt-get update && apt-get install -y \
 # Copy the requirements first to avoid having to re-do it when the code changes.
 # Requirements in requirements.txt are pinned to specific version
 # usually the output of a pip freeze
-ONBUILD COPY requirements.txt /usr/src/app/
-ONBUILD RUN pip install --no-cache-dir -r requirements.txt
-
-# Do this as late as possible so that reinstalling dependencies is a manual
-# process triggered by a new build.
-# Requirements in setup.py are not pinned to specific versions.
-ONBUILD COPY . /usr/src/app
-# We believe every Django app/project should be pip installable.
-ONBUILD RUN pip install -e /usr/src/app
+COPY requirements.txt /usr/src/app/
+RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8000
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
