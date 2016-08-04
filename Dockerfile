@@ -24,5 +24,13 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt /usr/src/app/
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Update the requirements from the local env in case they differ from the pre-built ones.
+ONBUILD COPY requirements.txt /usr/src/app/
+ONBUILD RUN pip install --no-cache-dir -r requirements.txt
+
+ONBUILD COPY . /usr/src/app/
+ONBUILD RUN pip install -e --no-deps /usr/src/app/
+
+
 EXPOSE 8000
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
