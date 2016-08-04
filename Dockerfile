@@ -1,4 +1,5 @@
 FROM python:2.7.9
+MAINTAINER Ariel Núñez<ariel@terranodo.io>                                                                                       
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
