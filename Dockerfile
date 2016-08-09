@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
 		sqlite3 \
                 python-gdal python-psycopg2 \
                 python-imaging python-lxml \
+                python-dev libgdal-dev \
 	--no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 
@@ -23,6 +24,10 @@ RUN apt-get update && apt-get install -y \
 # usually the output of a pip freeze
 COPY requirements.txt /usr/src/app/
 RUN pip install --no-cache-dir -r requirements.txt
+
+# python-gdal does not seem to work, let's install manually the version that is
+# compatible with the provided libgdal-dev
+RUN pip install GDAL==1.10 --global-option=build_ext --global-option="-I/usr/include/gdal"
 
 EXPOSE 8000
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
