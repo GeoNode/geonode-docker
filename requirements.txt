@@ -16,7 +16,7 @@ django-taggit==0.18.0
 django-tastypie==0.13.3
 django-wsgi==1.0b1
 djangorestframework==3.3.3
-djmp==0.2.1
+djmp==0.2.6
 elasticsearch==1.9.0
 flake8==2.5.1
 geolinks==0.2.0
