@@ -1,5 +1,5 @@
 FROM python:2.7.9
-MAINTAINER Ariel Núñez<ariel@terranodo.io>                                                                                       
+MAINTAINER Ariel Núñez<ariel@terranodo.io>
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
                 python-gdal python-psycopg2 \
                 python-imaging python-lxml \
                 python-dev libgdal-dev \
+                python-ldap \
 	--no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 
