@@ -1,5 +1,5 @@
 FROM python:2.7.9
-MAINTAINER Ariel Núñez<ariel@terranodo.io>                                                                                       
+MAINTAINER Ariel Núñez<ariel@terranodo.io>
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y \
 		sqlite3 \
                 python-gdal python-psycopg2 \
                 python-imaging python-lxml \
+                python-dev libgdal-dev \
+                python-ldap \
 	--no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 
@@ -24,13 +26,16 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt /usr/src/app/
 RUN pip install --no-cache-dir -r requirements.txt
 
+# python-gdal does not seem to work, let's install manually the version that is
+# compatible with the provided libgdal-dev
+RUN pip install GDAL==1.10 --global-option=build_ext --global-option="-I/usr/include/gdal"
+
 # Update the requirements from the local env in case they differ from the pre-built ones.
 ONBUILD COPY requirements.txt /usr/src/app/
 ONBUILD RUN pip install --no-cache-dir -r requirements.txt
 
 ONBUILD COPY . /usr/src/app/
 ONBUILD RUN pip install -e --no-deps /usr/src/app/
-
 
 EXPOSE 8000
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
