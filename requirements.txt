@@ -1,6 +1,3 @@
-git+git://github.com/geonode/geonode.git@docker#egg=geonode
-
-
 amqp==1.4.9
 amqplib==1.0.2
 anyjson==0.3.3
