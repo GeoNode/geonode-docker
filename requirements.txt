@@ -1,3 +1,5 @@
+git+git://github.com/geonode/geonode.git@docker#egg=geonode
+
 amqp==1.4.9
 amqplib==1.0.2
 anyjson==0.3.3
@@ -42,7 +44,6 @@ elasticsearch==1.9.0
 flake8==2.3.0
 GDAL==1.10.0
 geolinks==0.2.0
-GeoNode==2.4.dev20160728204044
 geonode-agon-ratings==0.3.5
 geonode-announcements==1.0.8
 geonode-arcrest==10.2
