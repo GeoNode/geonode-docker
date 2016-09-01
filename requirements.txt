@@ -74,3 +74,4 @@ GeoNode==2.5.2
 
 uWSGI==2.0.13.1
 ipython==5.1.0
+ipdb==0.10.1
