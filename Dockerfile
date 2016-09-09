@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
                 python-dev libgdal-dev \
                 python-ldap \
                 libmemcached-dev libsasl2-dev zlib1g-dev \
+                python-pylibmc \
 	--no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 
