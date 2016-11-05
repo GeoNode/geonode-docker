@@ -71,7 +71,7 @@ django-treebeard==3.0
 urllib3==1.16
 pylibmc==1.2.3
 
-GeoNode==2.5.3
+GeoNode==2.5.5
 
 uWSGI==2.0.13.1
 ipython==5.1.0
