@@ -22,6 +22,9 @@ RUN apt-get update && apt-get install -y \
 COPY wait-for-postgres.sh /usr/bin/wait-for-postgres
 RUN chmod +x /usr/bin/wait-for-postgres
 
+# Upgrade pip
+RUN pip install --upgrade pip
+
 # To understand the next section (the need for requirements.txt and setup.py)
 # Please read: https://packaging.python.org/requirements/
 
