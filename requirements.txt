@@ -84,7 +84,7 @@ uWSGI==2.0.15
 gunicorn==19.7.1
 #debug
 ipython==5.5.0
-ipdb
+# ipdb==0.10.3 #fix issue with python_version >= "3.3"
 #docker
 docker==2.7.0
 invoke==0.22.0
