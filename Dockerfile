@@ -45,5 +45,13 @@ ONBUILD RUN pip install --no-cache-dir -r requirements.txt
 ONBUILD COPY . /usr/src/app/
 ONBUILD RUN pip install --no-deps --no-cache-dir -e /usr/src/app/
 
+COPY tasks.py /usr/src/app/
+COPY entrypoint.sh /usr/src/app/
+
+RUN chmod +x /usr/src/app/tasks.py \
+    && chmod +x /usr/src/app/entrypoint.sh
+
 EXPOSE 8000
+
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
