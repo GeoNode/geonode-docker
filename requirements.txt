@@ -2,7 +2,6 @@ Django==1.8.7
 MultipartPostHandler==0.1.0
 OWSLib==0.11.0
 Paver==1.2.4
-Shapely==1.5.13
 Unidecode==0.4.19
 amqp==1.4.9
 anyjson==0.3.3
@@ -84,7 +83,7 @@ GeoNode==2.6.3
 uWSGI==2.0.15
 gunicorn==19.7.1
 #debug
-ipython==5.5.0
+ipython==5.4.1
 ipdb==0.10.3
 #docker
 docker==2.7.0
