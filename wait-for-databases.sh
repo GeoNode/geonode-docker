@@ -4,7 +4,7 @@ set -e
 
 host="$1"
 shift
-cmd="$@"
+#cmd="$@"
 
 until psql -h "$host" -U "postgres" -c '\l'; do
   >&2 echo "Postgres is unavailable - sleeping"
@@ -22,4 +22,4 @@ until PGPASSWORD=${GEONODE_GEODATABASE_PASSWORD} psql -h "$host" -U ${GEONODE_GE
 done
 
 >&2 echo "GeoNode databases are up - executing command"
-exec $cmd
+#exec $cmd

@@ -11,6 +11,12 @@ BOOTSTRAP_IMAGE_CHEIP = 'codenvy/che-ip:nightly'
 
 
 @task
+def waitfordbs(ctx):
+    print "**************************databases*******************************"
+    ctx.run("/usr/src/app/wait-for-databases.sh", pty=True)
+
+
+@task
 def update(ctx):
     print "***************************initial*********************************"
     ctx.run("env", pty=True)
@@ -18,12 +24,24 @@ def update(ctx):
     print "Public IP is {0}".format(pub_ip)
     pub_port = _nginx_exposed_port()
     print "Public PORT is {0}".format(pub_port)
+    db_url = _update_db_connstring()
+    geodb_url = _update_geodb_connstring()
     envs = {
         "sitedomain": "{0}:{1}".format(pub_ip, pub_port),
+        "dburl": db_url,
+        "geodburl": geodb_url,
         "override_fn": "$HOME/.override_env"
     }
     ctx.run("echo export GEOSERVER_PUBLIC_LOCATION=\
 http://{sitedomain}/geoserver/ >> {override_fn}".format(**envs), pty=True)
+    ctx.run("echo export SITEURL=\
+http://{sitedomain}/ >> {override_fn}".format(**envs), pty=True)
+    ctx.run("echo export ALLOWED_HOSTS=\
+['{sitedomain}',] >> {override_fn}".format(**envs), pty=True)
+    ctx.run("echo export DATABASE_URL=\
+{dburl} >> {override_fn}".format(**envs), pty=True)
+    ctx.run("echo export GEODATABASE_URL=\
+{geodburl} >> {override_fn}".format(**envs), pty=True)
     ctx.run("source $HOME/.override_env", pty=True)
     print "****************************final**********************************"
     ctx.run("env", pty=True)
@@ -71,6 +89,30 @@ def _nginx_exposed_port():
     for key in json.loads(ports_dict):
         port = re.split('/tcp', key)[0]
     return port
+
+
+def _update_db_connstring():
+    user = os.getenv('GEONODE_DATABASE', 'geonode')
+    pwd = os.getenv('GEONODE_DATABASE_PASSWORD', 'geonode')
+    dbname = os.getenv('GEONODE_DATABASE', 'geonode')
+    connstr = 'postgres://{0}:{1}@db:5432/{2}'.format(
+        user,
+        pwd,
+        dbname
+    )
+    return connstr
+
+
+def _update_geodb_connstring():
+    geouser = os.getenv('GEONODE_GEODATABASE', 'geonode_data')
+    geopwd = os.getenv('GEONODE_GEODATABASE_PASSWORD', 'geonode_data')
+    geodbname = os.getenv('GEONODE_GEODATABASE', 'geonode_data')
+    geoconnstr = 'postgis://{0}:{1}@db:5432/{2}'.format(
+        geouser,
+        geopwd,
+        geodbname
+    )
+    return geoconnstr
 
 
 def _prepare_oauth_fixture():

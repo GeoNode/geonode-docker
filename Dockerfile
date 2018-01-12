@@ -19,8 +19,8 @@ RUN apt-get update && apt-get install -y \
 	--no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 
-COPY wait-for-postgres.sh /usr/bin/wait-for-postgres
-RUN chmod +x /usr/bin/wait-for-postgres
+COPY wait-for-databases.sh /usr/bin/wait-for-databases
+RUN chmod +x /usr/bin/wait-for-databases
 
 # Upgrade pip
 RUN pip install --upgrade pip
