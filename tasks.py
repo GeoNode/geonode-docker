@@ -13,7 +13,7 @@ BOOTSTRAP_IMAGE_CHEIP = 'codenvy/che-ip:nightly'
 @task
 def waitfordbs(ctx):
     print "**************************databases*******************************"
-    ctx.run("/usr/bin/wait-for-databases", pty=True)
+    ctx.run("/usr/bin/wait-for-databases {0}".format('db'), pty=True)
 
 
 @task
