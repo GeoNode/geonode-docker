@@ -50,7 +50,9 @@ http://{sitedomain}/ >> {override_fn}".format(**envs), pty=True)
 @task
 def migrations(ctx):
     print "**************************migrations*******************************"
-    ctx.run("django-admin.py migrate --noinput", pty=True)
+    ctx.run("django-admin.py migrate --noinput --settings={0}".format(
+        _localsettings()
+    ), pty=True)
 
 
 @task
@@ -63,13 +65,12 @@ def prepare(ctx):
 @task
 def fixtures(ctx):
     print "**************************fixtures********************************"
-    ctx.run("django-admin.py loaddata sample_admin", pty=True)
-    ctx.run("django-admin.py loaddata /tmp/default_oauth_apps_docker.json",
-            pty=True
-            )
-    ctx.run("django-admin.py loaddata geonode/base/fixtures/initial_data.json",
-            pty=True
-            )
+    ctx.run("django-admin.py loaddata sample_admin \
+--settings={0}".format(_localsettings()), pty=True)
+    ctx.run("django-admin.py loaddata /tmp/default_oauth_apps_docker.json \
+--settings={0}".format(_localsettings()), pty=True)
+    ctx.run("django-admin.py loaddata geonode/base/fixtures/initial_data.json \
+--settings={0}".format(_localsettings()), pty=True)
 
 
 def _docker_host_ip():
@@ -113,6 +114,11 @@ def _update_geodb_connstring():
         geodbname
     )
     return geoconnstr
+
+
+def _localsettings():
+    settings = os.getenv('DJANGO_SETTINGS_MODULE', 'geonode.settings')
+    return settings
 
 
 def _prepare_oauth_fixture():
