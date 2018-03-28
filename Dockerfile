@@ -1,5 +1,5 @@
-FROM python:2.7.9
-MAINTAINER Ariel Núñez<ariel@terranodo.io>
+FROM python:2.7.14
+MAINTAINER GeoNode development team
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -37,7 +37,7 @@ RUN pip install GDAL==1.10 --global-option=build_ext --global-option="-I/usr/inc
 # usually the output of a pip freeze
 COPY requirements.txt /usr/src/app/
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install git+https://github.com/GeoNode/geonode.git@2.7.x#egg=geonode # FIXME with pypi
+RUN pip install git+https://github.com/GeoNode/geonode.git@master#egg=geonode # FIXME with pypi
 
 # Update the requirements from the local env in case they differ from the pre-built ones.
 ONBUILD COPY requirements.txt /usr/src/app/
