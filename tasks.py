@@ -52,6 +52,12 @@ http://{public_fqdn}/ >> {override_fn}".format(**envs), pty=True)
 @task
 def migrations(ctx):
     print "**************************migrations*******************************"
+    ctx.run("django-admin.py makemigrations --noinput --merge --settings={0}".format(
+        _localsettings()
+    ), pty=True)
+    ctx.run("django-admin.py makemigrations --noinput --settings={0}".format(
+        _localsettings()
+    ), pty=True)
     ctx.run("django-admin.py migrate --noinput --settings={0}".format(
         _localsettings()
     ), pty=True)
