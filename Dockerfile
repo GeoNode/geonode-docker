@@ -23,7 +23,7 @@ COPY wait-for-databases.sh /usr/bin/wait-for-databases
 RUN chmod +x /usr/bin/wait-for-databases
 
 # Upgrade pip
-RUN pip install --upgrade pip
+RUN pip install pip==9.0.3
 
 # To understand the next section (the need for requirements.txt and setup.py)
 # Please read: https://packaging.python.org/requirements/
@@ -44,7 +44,7 @@ ONBUILD COPY requirements.txt /usr/src/app/
 ONBUILD RUN pip install --no-cache-dir -r requirements.txt
 
 ONBUILD COPY . /usr/src/app/
-ONBUILD RUN pip install --no-deps --no-cache-dir -e /usr/src/app/
+ONBUILD RUN pip install --no-cache-dir -e /usr/src/app/
 
 COPY tasks.py /usr/src/app/
 COPY entrypoint.sh /usr/src/app/
