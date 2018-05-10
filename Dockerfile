@@ -4,6 +4,7 @@ MAINTAINER GeoNode development team
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
+
 # This section is borrowed from the official Django image but adds GDAL and others
 RUN apt-get update && apt-get install -y \
 		gcc \
