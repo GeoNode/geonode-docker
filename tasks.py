@@ -44,7 +44,11 @@ http://{public_fqdn}/ >> {override_fn}".format(**envs), pty=True)
 {dburl} >> {override_fn}".format(**envs), pty=True)
     ctx.run("echo export GEODATABASE_URL=\
 {geodburl} >> {override_fn}".format(**envs), pty=True)
-    ctx.run("source $HOME/.override_env", pty=True)
+    ctx.run("echo export ASYNC_SIGNALS=\
+True >> {override_fn}".format(**envs), pty=True)
+    ctx.run("echo export BROKER_URL=\
+amqp://guest:guest@rabbitmq:5672/ >> {override_fn}".format(**envs), pty=True)
+    ctx.run("source {override_fn}".format(**envs), pty=True)
     print "****************************final**********************************"
     ctx.run("env", pty=True)
 
