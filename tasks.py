@@ -48,7 +48,7 @@ http://{public_fqdn}/ >> {override_fn}".format(**envs), pty=True)
 True >> {override_fn}".format(**envs), pty=True)
     ctx.run("echo export BROKER_URL=\
 amqp://guest:guest@rabbitmq:5672/ >> {override_fn}".format(**envs), pty=True)
-    ctx.run("source {override_fn}".format(**envs), pty=True)
+    ctx.run("source $HOME/.override_env", pty=True)
     print "****************************final**********************************"
     ctx.run("env", pty=True)
 
