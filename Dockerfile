@@ -18,7 +18,6 @@ RUN apt-get update && apt-get install -y \
                 python-pylibmc \
 	--no-install-recommends && rm -rf /var/lib/apt/lists/*
 
-
 COPY wait-for-databases.sh /usr/bin/wait-for-databases
 RUN chmod +x /usr/bin/wait-for-databases
 
