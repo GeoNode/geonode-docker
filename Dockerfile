@@ -1,5 +1,5 @@
-FROM python:2.7.9
-MAINTAINER Ariel Núñez<ariel@terranodo.io>
+FROM python:2.7.14
+MAINTAINER GeoNode development team
 
 RUN mkdir -p /usr/src/{app,geonode}
 
@@ -24,7 +24,7 @@ COPY wait-for-databases.sh /usr/bin/wait-for-databases
 RUN chmod +x /usr/bin/wait-for-databases
 
 # Upgrade pip
-RUN pip install --upgrade pip
+RUN pip install pip==9.0.3
 
 # To understand the next section (the need for requirements.txt and setup.py)
 # Please read: https://packaging.python.org/requirements/
@@ -56,7 +56,7 @@ ONBUILD COPY requirements.txt /usr/src/app/
 ONBUILD RUN pip install --no-cache-dir -r requirements.txt
 
 ONBUILD COPY . /usr/src/app/
-ONBUILD RUN pip install --no-deps --no-cache-dir -e /usr/src/app/
+ONBUILD RUN pip install --no-cache-dir -e /usr/src/app/
 
 EXPOSE 8000
 

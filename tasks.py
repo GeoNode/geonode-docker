@@ -40,7 +40,8 @@ http://{public_fqdn}/geoserver/ >> {override_fn}".format(**envs), pty=True)
         ctx.run("echo export SITEURL=\
 http://{public_fqdn}/ >> {override_fn}".format(**envs), pty=True)
     try:
-        current_allowed = ast.literal_eval(os.getenv('ALLOWED_HOSTS') or '[]')
+        current_allowed = ast.literal_eval(os.getenv('ALLOWED_HOSTS') or \
+                                           "['{public_fqdn}', '{public_host}', 'localhost', 'django', 'geonode',]".format(**envs))
     except ValueError:
         current_allowed = []
     current_allowed.extend(['{}'.format(pub_ip), '{}:{}'.format(pub_ip, pub_port)])
@@ -54,6 +55,10 @@ http://{public_fqdn}/ >> {override_fn}".format(**envs), pty=True)
     if not os.environ.get('GEODATABASE_URL'):
         ctx.run("echo export GEODATABASE_URL=\
 {geodburl} >> {override_fn}".format(**envs), pty=True)
+    ctx.run("echo export ASYNC_SIGNALS=\
+True >> {override_fn}".format(**envs), pty=True)
+    ctx.run("echo export BROKER_URL=\
+amqp://guest:guest@rabbitmq:5672/ >> {override_fn}".format(**envs), pty=True)
     ctx.run("source $HOME/.override_env", pty=True)
     print "****************************final**********************************"
     ctx.run("env", pty=True)
@@ -62,7 +67,13 @@ http://{public_fqdn}/ >> {override_fn}".format(**envs), pty=True)
 @task
 def migrations(ctx):
     print "**************************migrations*******************************"
-    ctx.run("python manage.py migrate --noinput --settings={0}".format(
+    ctx.run("django-admin.py makemigrations --noinput --merge --settings={0}".format(
+        _localsettings()
+    ), pty=True)
+    ctx.run("django-admin.py makemigrations --noinput --settings={0}".format(
+        _localsettings()
+    ), pty=True)
+    ctx.run("django-admin.py migrate --noinput --settings={0}".format(
         _localsettings()
     ), pty=True)
 
@@ -110,17 +121,20 @@ address {0}".format(ip_list[0]))
 
 def _container_exposed_port(component, instname):
     client = docker.from_env()
-    ports_dict = [c.attrs['Config']['ExposedPorts'] for c in client.containers.list(
-            filters={
-                'label': 'org.geonode.component={0}'.format(component),
-                'status': 'running'
-            }
-        ) if '{0}'.format(instname) in c.name]
-    for key in ports_dict[:1]:
-        if isinstance(key, basestring):
+    try:
+        ports_dict = json.dumps(
+            [c.attrs['Config']['ExposedPorts'] for c in client.containers.list(
+                filters={
+                    'label': 'org.geonode.component={0}'.format(component),
+                    'status': 'running'
+                }
+            ) if '{0}'.format(instname) in c.name][0]
+        )
+        for key in json.loads(ports_dict):
             port = re.split('/tcp', key)[0]
-            return port
-
+    except:
+        port = 80
+    return port
 
 def _update_db_connstring():
     user = os.getenv('GEONODE_DATABASE', 'geonode')
