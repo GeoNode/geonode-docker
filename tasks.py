@@ -1,3 +1,4 @@
+import ast
 import json
 import logging
 import os
@@ -19,7 +20,6 @@ def waitfordbs(ctx):
 @task
 def update(ctx):
     print "***************************initial*********************************"
-    ctx.run("env", pty=True)
     pub_ip = _geonode_public_host_ip()
     print "Public Hostname or IP is {0}".format(pub_ip)
     pub_port = _geonode_public_port()
@@ -27,22 +27,33 @@ def update(ctx):
     db_url = _update_db_connstring()
     geodb_url = _update_geodb_connstring()
     envs = {
-        "public_fqdn": "{0}:{1}".format(pub_ip, pub_port),
+        "public_fqdn": "{0}:{1}".format(pub_ip, pub_port or 80),
         "public_host": "{0}".format(pub_ip),
         "dburl": db_url,
         "geodburl": geodb_url,
         "override_fn": "$HOME/.override_env"
     }
-    ctx.run("echo export GEOSERVER_PUBLIC_LOCATION=\
+    if not os.environ.get('GEOSERVER_PUBLIC_LOCATION'):
+        ctx.run("echo export GEOSERVER_PUBLIC_LOCATION=\
 http://{public_fqdn}/geoserver/ >> {override_fn}".format(**envs), pty=True)
-    ctx.run("echo export SITEURL=\
+    if not os.environ.get('SITEURL'):
+        ctx.run("echo export SITEURL=\
 http://{public_fqdn}/ >> {override_fn}".format(**envs), pty=True)
-    ctx.run("echo export ALLOWED_HOSTS=\
-\"\\\"['{public_fqdn}', '{public_host}', 'localhost', 'django', 'geonode',]\\\"\" \
->> {override_fn}".format(**envs), pty=True)
-    ctx.run("echo export DATABASE_URL=\
+    try:
+        current_allowed = ast.literal_eval(os.getenv('ALLOWED_HOSTS') or \
+                                           "['{public_fqdn}', '{public_host}', 'localhost', 'django', 'geonode',]".format(**envs))
+    except ValueError:
+        current_allowed = []
+    current_allowed.extend(['{}'.format(pub_ip), '{}:{}'.format(pub_ip, pub_port)])
+    allowed_hosts = ['"{}"'.format(c) for c in current_allowed]
+
+    ctx.run('export ALLOWED_HOSTS="\\"{}\\""'.format(allowed_hosts), pty=True)
+    ctx.run('echo export ALLOWED_HOSTS="\\"{}\\""'.format(allowed_hosts), pty=True)
+    if not os.environ.get('DATABASE_URL'):
+        ctx.run("echo export DATABASE_URL=\
 {dburl} >> {override_fn}".format(**envs), pty=True)
-    ctx.run("echo export GEODATABASE_URL=\
+    if not os.environ.get('GEODATABASE_URL'):
+        ctx.run("echo export GEODATABASE_URL=\
 {geodburl} >> {override_fn}".format(**envs), pty=True)
     ctx.run("echo export ASYNC_SIGNALS=\
 True >> {override_fn}".format(**envs), pty=True)
@@ -66,6 +77,12 @@ def migrations(ctx):
         _localsettings()
     ), pty=True)
 
+@task
+def statics(ctx):
+    print "**************************migrations*******************************"
+    ctx.run("python manage.py collectstatic --noinput --settings={0}".format(
+        _localsettings()
+    ), pty=True)
 
 @task
 def prepare(ctx):
@@ -81,16 +98,25 @@ def fixtures(ctx):
 --settings={0}".format(_localsettings()), pty=True)
     ctx.run("django-admin.py loaddata /tmp/default_oauth_apps_docker.json \
 --settings={0}".format(_localsettings()), pty=True)
-    ctx.run("django-admin.py loaddata geonode/base/fixtures/initial_data.json \
+    ctx.run("django-admin.py loaddata /usr/src/geonode/geonode/base/fixtures/initial_data.json \
 --settings={0}".format(_localsettings()), pty=True)
 
 
 def _docker_host_ip():
     client = docker.from_env()
-    ip = client.containers.run(BOOTSTRAP_IMAGE_CHEIP, network_mode='host')
-    print("Docker daemon is running at the following \
-address {0}".format(ip))
-    return ip.replace("\n", "")
+    ip_list = client.containers.run(BOOTSTRAP_IMAGE_CHEIP,
+                                    network_mode='host'
+                                    ).split("\n")
+    if len(ip_list) > 1:
+        print("Docker daemon is running on more than one \
+address {0}".format(ip_list))
+        print("Only the first address:{0} will be returned!".format(
+            ip_list[0]
+        ))
+    else:
+        print("Docker daemon is running at the following \
+address {0}".format(ip_list[0]))
+    return ip_list[0]
 
 
 def _container_exposed_port(component, instname):
@@ -109,7 +135,6 @@ def _container_exposed_port(component, instname):
     except:
         port = 80
     return port
-
 
 def _update_db_connstring():
     user = os.getenv('GEONODE_DATABASE', 'geonode')
