@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-/usr/local/bin/invoke update
+/usr/local/bin/invoke update >> /usr/src/app/invoke.log
 
 source $HOME/.override_env
 
@@ -11,18 +11,18 @@ echo SITEURL=$SITEURL
 echo ALLOWED_HOSTS=$ALLOWED_HOSTS
 echo GEOSERVER_PUBLIC_LOCATION=$GEOSERVER_PUBLIC_LOCATION
 
-/usr/local/bin/invoke waitfordbs
+/usr/local/bin/invoke waitfordbs >> /usr/src/app/invoke.log
 
 echo "waitfordbs task done"
 
 echo "running migrations"
-/usr/local/bin/invoke migrations
-/usr/local/bin/invoke statics
+/usr/local/bin/invoke migrations >> /usr/src/app/invoke.log
+/usr/local/bin/invoke statics >> /usr/src/app/invoke.log
 
 echo "migrations task done"
-/usr/local/bin/invoke prepare
+/usr/local/bin/invoke prepare >> /usr/src/app/invoke.log
 echo "prepare task done"
-/usr/local/bin/invoke fixtures
+/usr/local/bin/invoke fixtures >> /usr/src/app/invoke.log
 echo "fixture task done"
 
 cmd="$@"
