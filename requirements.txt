@@ -47,7 +47,8 @@ tqdm==4.23.3
 
 # Django Apps
 dj-pagination<=2.3.2 # python-dj-pagination (2.3.2 in our ppa)
-django-extensions>=1.2.5,<=2.0.3 # python-django-extensions (2.0.3 in our ppa)
+django-celery-monitor<=1.1.2
+django-extensions>=1.2.5,<=2.0.7 # python-django-extensions (2.0.3 in our ppa)
 django-jsonfield<=1.0.1 # python-django-jsonfield (0.9.15, 1.0.1 in our ppa)
 django-jsonfield-compat<=0.4.4 # python-django-jsonfield-compat (0.4.4 in our ppa)
 django-leaflet<=0.23.0 # python-django-leaflet (0.23.0 in our ppa)

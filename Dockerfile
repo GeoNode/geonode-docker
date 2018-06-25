@@ -1,7 +1,8 @@
 FROM python:2.7.14
 MAINTAINER GeoNode development team
 
-RUN mkdir -p /usr/src/app
+RUN mkdir -p /usr/src/{app,geonode}
+
 WORKDIR /usr/src/app
 
 # This section is borrowed from the official Django image but adds GDAL and others
@@ -31,28 +32,32 @@ RUN pip install --upgrade pip
 # compatible with the provided libgdal-dev
 RUN pip install GDAL==1.10 --global-option=build_ext --global-option="-I/usr/include/gdal"
 
-# Copy the requirements first to avoid having to re-do it when the code changes.
-# Requirements in requirements.txt are pinned to specific version
-# usually the output of a pip freeze
-COPY requirements.txt /usr/src/app/
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install git+https://github.com/GeoNode/geonode.git@2.7.x#egg=geonode # FIXME with pypi
+# install shallow clone of geonode master branch
+RUN git clone --depth=1 git://github.com/GeoNode/geonode.git --branch 2.7.x /usr/src/geonode
+RUN cd /usr/src/geonode/; pip install --upgrade --no-cache-dir -r requirements.txt; pip install --upgrade -e .
 
-# Update the requirements from the local env in case they differ from the pre-built ones.
-ONBUILD COPY requirements.txt /usr/src/app/
-ONBUILD RUN pip install --no-cache-dir -r requirements.txt
 
-ONBUILD COPY . /usr/src/app/
-ONBUILD RUN pip install --no-deps --no-cache-dir -e /usr/src/app/
-
-COPY tasks.py /usr/src/app/
-COPY entrypoint.sh /usr/src/app/
-COPY uwsgi.ini /usr/src/app/
+RUN cp /usr/src/geonode/tasks.py /usr/src/app/
+RUN cp /usr/src/geonode/entrypoint.sh /usr/src/app/
 
 RUN chmod +x /usr/src/app/tasks.py \
     && chmod +x /usr/src/app/entrypoint.sh
 
+
+# use latest master
+ONBUILD RUN cd /usr/src/geonode/; git pull ; pip install --upgrade --no-cache-dir -r requirements.txt; pip install --upgrade -e .
+ONBUILD COPY . /usr/src/app
+ONBUILD RUN pip install --upgrade --no-cache-dir -r /usr/src/app/requirements.txt
+ONBUILD RUN pip install -e /usr/src/app --upgrade
+
+# Update the requirements from the local env in case they differ from the pre-built ones.
+ONBUILD COPY requirements.txt /usr/src/app/
+ONBUILD RUN pip install --upgrade --no-cache-dir -r requirements.txt
+
+ONBUILD COPY . /usr/src/app/
+ONBUILD RUN pip install --upgrade --no-cache-dir -e /usr/src/app/
+
 EXPOSE 8000
 
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["uwsgi", "--ini", "/usr/src/app/uwsgi.ini"]
