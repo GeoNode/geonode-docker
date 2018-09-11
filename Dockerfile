@@ -58,6 +58,9 @@ ONBUILD RUN pip install --upgrade --no-cache-dir -r requirements.txt
 ONBUILD COPY . /usr/src/app/
 ONBUILD RUN pip install --upgrade --no-cache-dir -e /usr/src/app/
 
+COPY entrypoint.sh /usr/src/app/
+COPY uwsgi.ini /usr/src/app
+
 EXPOSE 8000
 
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
