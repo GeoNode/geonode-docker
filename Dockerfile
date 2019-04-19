@@ -1,4 +1,4 @@
-FROM python:2.7.14
+FROM python:2.7.16
 MAINTAINER GeoNode development team
 
 RUN mkdir -p /usr/src/{app,geonode}
