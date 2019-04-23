@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 		gettext \
 		postgresql-client libpq-dev \
 		sqlite3 \
-                python-gdal python-psycopg2 \
+                python-psycopg2 \
                 python-imaging python-lxml \
                 python-dev libgdal-dev \
                 python-ldap \
@@ -29,9 +29,8 @@ RUN pip install --upgrade pip
 # To understand the next section (the need for requirements.txt and setup.py)
 # Please read: https://packaging.python.org/requirements/
 
-# python-gdal does not seem to work, let's install manually the version that is
-# compatible with the provided libgdal-dev
-RUN pip install GDAL==1.10 --global-option=build_ext --global-option="-I/usr/include/gdal"
+#let's install pygdal wheels compatible with the provided libgdal-dev
+RUN gdal-config --version | cut -c 1-5 | xargs -I % pip install 'pygdal>=%.0,<=%.999'
 
 # install shallow clone of geonode master branch
 RUN git clone --depth=1 git://github.com/GeoNode/geonode.git --branch master /usr/src/geonode
