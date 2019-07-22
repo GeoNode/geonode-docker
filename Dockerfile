@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 		postgresql-client libpq-dev \
 		sqlite3 \
                 python-psycopg2 \
-                python-imaging python-lxml \
+                python-lxml \
                 python-dev libgdal-dev \
                 python-ldap \
                 libmemcached-dev libsasl2-dev zlib1g-dev \
