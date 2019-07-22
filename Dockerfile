@@ -34,6 +34,7 @@ RUN gdal-config --version | cut -c 1-5 | xargs -I % pip install 'pygdal>=%.0,<=%
 
 # install shallow clone of geonode master branch
 RUN git clone --depth=1 git://github.com/GeoNode/geonode.git --branch master /usr/src/geonode
+RUN cd /usr/src/geonode/; git checkout tags/2.10
 RUN cd /usr/src/geonode/; pip install --upgrade --no-cache-dir -r requirements.txt; pip install --upgrade -e .
 
 
