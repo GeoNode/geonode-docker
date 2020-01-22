@@ -1,4 +1,4 @@
-FROM python:2.7.16
+FROM python:3.7.6
 MAINTAINER GeoNode development team
 
 RUN mkdir -p /usr/src/{app,geonode}
@@ -33,7 +33,7 @@ RUN pip install --upgrade pip
 RUN gdal-config --version | cut -c 1-5 | xargs -I % pip install 'pygdal>=%.0,<=%.999'
 
 # install shallow clone of geonode 2.10.1 branch
-RUN git clone --depth=1 git://github.com/GeoNode/geonode.git --branch 2.10.1 /usr/src/geonode
+RUN git clone --depth=1 git://github.com/GeoNode/geonode.git /usr/src/geonode
 RUN cd /usr/src/geonode/; pip install --upgrade --no-cache-dir -r requirements.txt; pip install --upgrade -e .
 
 
