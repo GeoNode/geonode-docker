@@ -11,12 +11,12 @@ RUN apt-get update && apt-get install -y \
 		gettext \
 		postgresql-client libpq-dev \
 		sqlite3 \
-                python-psycopg2 \
-                python-lxml \
-                python-dev libgdal-dev \
-                python-ldap \
+                python3-psycopg2 \
+                python3-lxml \
+                python3-dev libgdal-dev \
+                python3-ldap \
                 libmemcached-dev libsasl2-dev zlib1g-dev \
-                python-pylibmc \
+                python3-pylibmc \
 	--no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 
