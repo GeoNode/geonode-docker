@@ -24,7 +24,7 @@ COPY wait-for-databases.sh /usr/bin/wait-for-databases
 RUN chmod +x /usr/bin/wait-for-databases
 
 # Upgrade pip
-RUN pip install --upgrade pip
+RUN pip install pip==20.1
 
 # To understand the next section (the need for requirements.txt and setup.py)
 # Please read: https://packaging.python.org/requirements/
