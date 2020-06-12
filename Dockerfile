@@ -1,24 +1,33 @@
-FROM python:3.7.6
+FROM python:3.8.3-buster
 MAINTAINER GeoNode development team
 
 RUN mkdir -p /usr/src/{app,geonode}
 
 WORKDIR /usr/src/app
 
+# Enable postgresql-client-11.2
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+
+
 # This section is borrowed from the official Django image but adds GDAL and others
 RUN apt-get update && apt-get install -y \
-		gcc \
+		gcc zip \
 		gettext \
-		postgresql-client libpq-dev \
-		sqlite3 \
-                python3-psycopg2 \
-                python3-lxml \
+		postgresql-client-11 libpq-dev \
+		sqlite3 spatialite-bin libsqlite3-mod-spatialite \
+                python3-gdal python3-psycopg2 python3-ldap \
+                python3-pil python3-lxml python3-pylibmc \
                 python3-dev libgdal-dev \
-                python3-ldap \
-                libmemcached-dev libsasl2-dev zlib1g-dev \
-                python3-pylibmc \
+                libxml2 libxml2-dev libxslt1-dev zlib1g-dev libjpeg-dev \
+                libmemcached-dev libsasl2-dev \
+                libldap2-dev libsasl2-dev \
+                uwsgi uwsgi-plugin-python3 \
 	--no-install-recommends && rm -rf /var/lib/apt/lists/*
 
+
+RUN printf "deb http://archive.debian.org/debian/ jessie main\ndeb-src http://archive.debian.org/debian/ jessie main\ndeb http://security.debian.org jessie/updates main\ndeb-src http://security.debian.org jessie/updates main" > /etc/apt/sources.list
+RUN apt-get update && apt-get install -y geoip-bin
 
 COPY wait-for-databases.sh /usr/bin/wait-for-databases
 RUN chmod +x /usr/bin/wait-for-databases
