@@ -1,75 +1,59 @@
 FROM python:3.8.3-buster
-MAINTAINER GeoNode development team
+LABEL GeoNode development team
 
 RUN mkdir -p /usr/src/{app,geonode}
-
-WORKDIR /usr/src/app
 
 # Enable postgresql-client-11.2
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
-
 # This section is borrowed from the official Django image but adds GDAL and others
 RUN apt-get update && apt-get install -y \
-		gcc zip \
-		gettext \
-		postgresql-client-11 libpq-dev \
-		sqlite3 spatialite-bin libsqlite3-mod-spatialite \
-                python3-gdal python3-psycopg2 python3-ldap \
-                python3-pil python3-lxml python3-pylibmc \
-                python3-dev libgdal-dev \
-                libxml2 libxml2-dev libxslt1-dev zlib1g-dev libjpeg-dev \
-                libmemcached-dev libsasl2-dev \
-                libldap2-dev libsasl2-dev \
-                uwsgi uwsgi-plugin-python3 \
-	--no-install-recommends && rm -rf /var/lib/apt/lists/*
+        gcc zip gettext geoip-bin cron \
+        postgresql-client-11 libpq-dev \
+        sqlite3 spatialite-bin libsqlite3-mod-spatialite \
+        python3-gdal python3-psycopg2 python3-ldap \
+        python3-pil python3-lxml python3-pylibmc \
+        python3-dev libgdal-dev \
+        libxml2 libxml2-dev libxslt1-dev zlib1g-dev libjpeg-dev \
+        libmemcached-dev libsasl2-dev \
+        libldap2-dev libsasl2-dev \
+        uwsgi uwsgi-plugin-python3 \
+    --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
+# add bower and grunt command
+COPY . /usr/src/app/
+WORKDIR /usr/src/app
 
-RUN printf "deb http://archive.debian.org/debian/ jessie main\ndeb-src http://archive.debian.org/debian/ jessie main\ndeb http://security.debian.org jessie/updates main\ndeb-src http://security.debian.org jessie/updates main" > /etc/apt/sources.list
-RUN apt-get update && apt-get install -y geoip-bin
+COPY monitoring-cron /etc/cron.d/monitoring-cron
+RUN chmod 0644 /etc/cron.d/monitoring-cron
+RUN crontab /etc/cron.d/monitoring-cron
+RUN touch /var/log/cron.log
+RUN service cron start
 
 COPY wait-for-databases.sh /usr/bin/wait-for-databases
 RUN chmod +x /usr/bin/wait-for-databases
-
-# Upgrade pip
-RUN pip install pip==20.1
-
-# To understand the next section (the need for requirements.txt and setup.py)
-# Please read: https://packaging.python.org/requirements/
-
-#let's install pygdal wheels compatible with the provided libgdal-dev
-RUN gdal-config --version | cut -c 1-5 | xargs -I % pip install 'pygdal>=%.0,<=%.999'
-
-# install shallow clone of geonode 2.10.1 branch
-RUN git clone --depth=1 git://github.com/GeoNode/geonode.git /usr/src/geonode
-RUN cd /usr/src/geonode/; pip install --upgrade --no-cache-dir -r requirements.txt; pip install --upgrade -e .
-
-
-RUN cp /usr/src/geonode/tasks.py /usr/src/app/
-RUN cp /usr/src/geonode/entrypoint.sh /usr/src/app/
-
 RUN chmod +x /usr/src/app/tasks.py \
     && chmod +x /usr/src/app/entrypoint.sh
 
+# Prepraing dependencies
+RUN apt-get update && apt-get install -y devscripts build-essential debhelper pkg-kde-tools sharutils
+RUN git clone https://salsa.debian.org/debian-gis-team/proj.git /tmp/proj
+RUN cd /tmp/proj && debuild -i -us -uc -b && dpkg -i ../*.deb
 
-# use 2.10.1
-ONBUILD RUN cd /usr/src/geonode/; git pull ; pip install --upgrade --no-cache-dir -r requirements.txt; pip install --upgrade -e .
-ONBUILD COPY . /usr/src/app
-ONBUILD RUN pip install --upgrade --no-cache-dir -r /usr/src/app/requirements.txt
-ONBUILD RUN pip install -e /usr/src/app --upgrade
+# Install pip packages
+RUN pip install pip --upgrade
+RUN pip install --upgrade --no-cache-dir --src /usr/src -r requirements.txt \
+    && pip install pygdal==$(gdal-config --version).* \
+    && pip install flower==0.9.4
 
-# Update the requirements from the local env in case they differ from the pre-built ones.
-ONBUILD COPY requirements.txt /usr/src/app/
-ONBUILD RUN pip install --upgrade --no-cache-dir -r requirements.txt
-
-ONBUILD COPY . /usr/src/app/
-ONBUILD RUN pip install --upgrade --no-cache-dir -e /usr/src/app/
-
-COPY entrypoint.sh /usr/src/app/
-COPY uwsgi.ini /usr/src/app
+# Install "geonode-contribs" apps
+RUN cd /usr/src; git clone https://github.com/GeoNode/geonode-contribs.git -b master
+# Install logstash and centralized dashboard dependencies
+RUN cd /usr/src/geonode-contribs/geonode-logstash; pip install --upgrade -e . \
+	cd /usr/src/geonode-contribs/ldap; pip install --upgrade -e .
 
 EXPOSE 8000
 
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+ENTRYPOINT service cron restart && /usr/src/app/entrypoint.sh
 CMD ["uwsgi", "--ini", "/usr/src/app/uwsgi.ini"]
