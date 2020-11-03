@@ -51,8 +51,6 @@ RUN pip install --upgrade --no-cache-dir --src /usr/src -r requirements.txt \
     && pip install pygdal==$(gdal-config --version).* \
     && pip install flower==0.9.4
 
-RUN pip install --upgrade -e .
-
 # Install "geonode-contribs" apps
 RUN cd /usr/src; git clone https://github.com/GeoNode/geonode-contribs.git -b master
 # Install logstash and centralized dashboard dependencies
