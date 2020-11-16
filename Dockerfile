@@ -10,12 +10,13 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-k
 # This section is borrowed from the official Django image but adds GDAL and others
 RUN apt-get update && apt-get install -y \
         libpq-dev python-dev libxml2-dev \
-        libxml2 libxml2-dev libxslt1-dev zlib1g-dev libjpeg-dev \
+        libxml2 libxslt1-dev zlib1g-dev libjpeg-dev \
         libmemcached-dev libldap2-dev libsasl2-dev libffi-dev
 
 RUN apt-get update && apt-get install -y \
         gcc zip gettext geoip-bin cron \
-        postgresql-client-11 sqlite3 spatialite-bin libsqlite3-mod-spatialite \
+        postgresql-client-11 \
+        sqlite3 spatialite-bin libsqlite3-mod-spatialite \
         python3-gdal python3-psycopg2 python3-ldap \
         python3-pip python3-pil python3-lxml python3-pylibmc \
         python3-dev libgdal-dev \
@@ -51,6 +52,13 @@ RUN pip install --upgrade --no-cache-dir --src /usr/src -r requirements.txt \
     && pip install pygdal==$(gdal-config --version).* \
     && pip install flower==0.9.4
 
+RUN pip install --upgrade -e .
+
+# Activate "memcached"
+RUN apt install memcached
+RUN pip install pylibmc \
+    && pip install sherlock
+
 # Install "geonode-contribs" apps
 RUN cd /usr/src; git clone https://github.com/GeoNode/geonode-contribs.git -b master
 # Install logstash and centralized dashboard dependencies
@@ -59,5 +67,5 @@ RUN cd /usr/src/geonode-contribs/geonode-logstash; pip install --upgrade -e . \
 
 EXPOSE 8000
 
-ENTRYPOINT service cron restart && /usr/src/app/entrypoint.sh
+ENTRYPOINT service cron restart && service memcached restart && /usr/src/app/entrypoint.sh
 CMD ["uwsgi", "--ini", "/usr/src/app/uwsgi.ini"]
