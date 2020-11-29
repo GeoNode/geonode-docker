@@ -77,7 +77,6 @@ def update(ctx):
         "monitoring_host_name": os.environ.get('MONITORING_HOST_NAME', 'geonode'),
         "monitoring_service_name": os.environ.get('MONITORING_SERVICE_NAME', 'local-geonode'),
         "monitoring_data_ttl": os.environ.get('MONITORING_DATA_TTL', 7),
-        "geoip_path": os.environ.get('GEOIP_PATH', '/mnt/volumes/statics/geoip.db'),
         "geonode_geodb_passwd": os.environ.get('GEONODE_GEODATABASE_PASSWORD', 'geonode_data'),
         "default_backend_datastore": os.environ.get('DEFAULT_BACKEND_DATASTORE', 'datastore'),
         "geonode_db_passwd": os.environ.get('GEONODE_DATABASE_PASSWORD', 'geonode'),
@@ -211,6 +210,21 @@ def prepare(ctx):
             client_secret=os.environ['OAUTH2_CLIENT_SECRET'],
             oauth_config=oauth_config
         ), pty=True)
+    ctx.run(
+        'sed -i "s|<userAuthorizationUri>.*</userAuthorizationUri>|<userAuthorizationUri>{new_ext_ip}o/authorize/</userAuthorizationUri>|g" {oauth_config}'.format(
+            new_ext_ip=os.environ['SITEURL'],
+            oauth_config=oauth_config
+        ), pty=True)
+    ctx.run(
+        'sed -i "s|<redirectUri>.*</redirectUri>|<redirectUri>{new_ext_ip}geoserver/index.html</redirectUri>|g" {oauth_config}'.format(
+            new_ext_ip=os.environ['SITEURL'],
+            oauth_config=oauth_config
+        ), pty=True)
+    ctx.run(
+        'sed -i "s|<logoutUri>.*</logoutUri>|<logoutUri>{new_ext_ip}account/logout/</logoutUri>|g" {oauth_config}'.format(
+            new_ext_ip=os.environ['SITEURL'],
+            oauth_config=oauth_config
+        ), pty=True)
 
 
 @task
@@ -222,7 +236,7 @@ def fixtures(ctx):
 --settings={0}".format(_localsettings()), pty=True)
     ctx.run("python manage.py loaddata /tmp/default_site.json \
 --settings={0}".format(_localsettings()), pty=True)
-    ctx.run("python manage.py loaddata /usr/src/app/fixtures/initial_data.json \
+    ctx.run("python manage.py loaddata initial_data \
 --settings={0}".format(_localsettings()), pty=True)
     ctx.run("python manage.py set_all_layers_alternate \
 --settings={0}".format(_localsettings()), pty=True)
