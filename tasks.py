@@ -81,7 +81,7 @@ def update(ctx):
         "default_backend_datastore": os.environ.get('DEFAULT_BACKEND_DATASTORE', 'datastore'),
         "geonode_db_passwd": os.environ.get('GEONODE_DATABASE_PASSWORD', 'geonode'),
         "geonode_geodb": os.environ.get('GEONODE_GEODATABASE', 'geonode_data'),
-        "db_url": os.environ.get('DATABASE_URL', 'postgres://geonode:geonode@db:5432/geonode'),
+        "db_url": os.environ.get('DATABASE_URL', 'postgis://geonode:geonode@db:5432/geonode'),
         "geodb_url": os.environ.get('GEODATABASE_URL', 'postgis://geonode:geonode@db:5432/geonode_data'),
         "geonode_db": os.environ.get('GEONODE_DATABASE', 'geonode'),
         "gs_loc": os.environ.get('GEOSERVER_LOCATION', 'http://geoserver:8080/geoserver/'),
@@ -297,10 +297,15 @@ def initialized(ctx):
     ctx.run('date > /mnt/volumes/statics/geonode_init.lock')
 
 def _docker_host_ip():
-    client = docker.from_env()
-    ip_list = client.containers.run(BOOTSTRAP_IMAGE_CHEIP,
-                                    network_mode='host'
-                                    ).split("\n")
+    try:
+        client = docker.from_env(version='1.24')
+        ip_list = client.containers.run(BOOTSTRAP_IMAGE_CHEIP,
+                                        network_mode='host'
+                                        ).split("\n")
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        ip_list = ['127.0.0.1', ]
     if len(ip_list) > 1:
         print("Docker daemon is running on more than one \
 address {0}".format(ip_list))
@@ -314,24 +319,29 @@ address {0}".format(ip_list[0]))
 
 
 def _container_exposed_port(component, instname):
-    client = docker.from_env()
-    ports_dict = json.dumps(
-        [c.attrs['Config']['ExposedPorts'] for c in client.containers.list(
-            filters={
-                'label': 'org.geonode.component={0}'.format(component),
-                'status': 'running'
-            }
-        ) if '{0}'.format(instname) in c.name][0]
-    )
-    for key in json.loads(ports_dict):
-        port = re.split('/tcp', key)[0]
+    try:
+        client = docker.from_env(version='1.24')
+        ports_dict = json.dumps(
+            [c.attrs['Config']['ExposedPorts'] for c in client.containers.list(
+                filters={
+                    'label': 'org.geonode.component={0}'.format(component),
+                    'status': 'running'
+                }
+            ) if '{0}'.format(instname) in c.name][0]
+        )
+        for key in json.loads(ports_dict):
+            port = re.split('/tcp', key)[0]
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        port = '80'
     return port
 
 def _update_db_connstring():
     user = os.getenv('GEONODE_DATABASE', 'geonode')
     pwd = os.getenv('GEONODE_DATABASE_PASSWORD', 'geonode')
     dbname = os.getenv('GEONODE_DATABASE', 'geonode')
-    connstr = 'postgres://{0}:{1}@db:5432/{2}'.format(
+    connstr = 'postgis://{0}:{1}@db:5432/{2}'.format(
         user,
         pwd,
         dbname
