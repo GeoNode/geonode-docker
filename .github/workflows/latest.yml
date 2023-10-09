@@ -3,6 +3,8 @@ name: Docker Image (Build and Push)
 on:
   push:
     branches: [ master ]
+    paths: 
+      - "docker/**"
 
 jobs:
   geoserver:
