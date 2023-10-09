@@ -1,6 +1,7 @@
 name: Build image (manual)
 
 on:
+  push:
   workflow_dispatch:
     inputs:
       image:
@@ -22,7 +23,7 @@ on:
         description: Push the image to Docker Hub?
 
 jobs:
-  greet:
+  build:
     runs-on: ubuntu-latest
 
     steps:
