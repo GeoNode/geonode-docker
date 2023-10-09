@@ -9,7 +9,7 @@ on:
         description: Image
         options: 
         - geoserver
-        - geoserver_data_dir
+        - geoserver_data
         - nginx
         - postgis
         - letsencrypt

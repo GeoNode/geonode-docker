@@ -62,7 +62,7 @@ jobs:
           push: true
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-  data_dir_conf:
+  geoserver_data:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -71,11 +71,11 @@ jobs:
         with:
           filters: |
             src:
-              - 'docker/data_dir_conf/**'
+              - 'docker/geoserver_data/**'
       - uses: ./.github/actions/build_and_push
         if: steps.changes.outputs.src == 'true'
         with:
-          image: "data_dir_conf"
+          image: "geoserver_data"
           branch: "master"
           tag: "latest"
           push: true

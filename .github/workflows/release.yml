@@ -65,8 +65,8 @@ jobs:
         push: true
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-  data_dir_conf:
-    if: ${{ contains(github.ref, 'data-dir-conf_') }}
+  geoserver_data:
+    if: ${{ contains(github.ref, 'geoserver_data_') }}
     runs-on: ubuntu-latest
     steps:
     - uses: winterjung/split@v2
@@ -79,9 +79,9 @@ jobs:
        ref: ${{ github.ref }}
     - uses: ./.github/actions/build_and_push
       with:
-        image: "data-dir-conf"
+        image: "geoserver_data"
         branch: ${{ github.ref }}
-        tag: ${{ steps.split.outputs._1 }}
+        tag: ${{ steps.split.outputs._2 }}
         push: true
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
