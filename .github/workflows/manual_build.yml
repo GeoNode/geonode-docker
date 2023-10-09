@@ -1,7 +1,6 @@
 name: Build image (manual)
 
 on:
-  push:
   workflow_dispatch:
     inputs:
       image:
