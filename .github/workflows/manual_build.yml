@@ -40,6 +40,6 @@ jobs:
         file: ./docker/${{ github.event.inputs.image }}/Dockerfile
         context: "./docker/${{ github.event.inputs.image }}/"
         push: ${{fromJSON(github.event.inputs.push)}}
-        tags: giohappy/${{ github.event.inputs.image }}:${{ github.event.inputs.tag }}
+        tags: geonode/${{ github.event.inputs.image }}:${{ github.event.inputs.tag }}
     - name: Final message
       run: echo "Built ${{ github.event.inputs.image }} from branch ${{ github.event.inputs.branch }} (push ${{ fromJSON(github.event.inputs.push) }})"

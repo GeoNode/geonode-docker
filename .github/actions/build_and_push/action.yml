@@ -33,4 +33,4 @@ runs:
         file: ./docker/${{ inputs.image }}/Dockerfile
         context: "./docker/${{ inputs.image }}/"
         push: ${{ inputs.push }}
-        tags: giohappy/${{ inputs.image }}:${{ inputs.tag }}
+        tags: geonode/${{ inputs.image }}:${{ inputs.tag }}
