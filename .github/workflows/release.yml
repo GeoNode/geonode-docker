@@ -6,13 +6,13 @@ on:
 
 jobs:
   geoserver:
-    if: ${{ contains(github.ref, 'geoserver_') }}
+    if: ${{ contains(github.ref, 'geoserver#') }}
     runs-on: ubuntu-latest
     steps:
     - uses: winterjung/split@v2
       id: split
       with:
-        separator: "_"
+        separator: "#"
         msg: ${{ github.ref }}
     - uses: actions/checkout@v3
       with:
@@ -26,13 +26,13 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
   postgis:
-    if: ${{ contains(github.ref, 'postgis_') }}
+    if: ${{ contains(github.ref, 'postgis#') }}
     runs-on: ubuntu-latest
     steps:
     - uses: winterjung/split@v2
       id: split
       with:
-        separator: "_"
+        separator: "#"
         msg: ${{ github.ref }}
     - uses: actions/checkout@v3
       with:
@@ -46,13 +46,13 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
   nginx:
-    if: ${{ contains(github.ref, 'nginx_') }}
+    if: ${{ contains(github.ref, 'nginx#') }}
     runs-on: ubuntu-latest
     steps:
     - uses: winterjung/split@v2
       id: split
       with:
-        separator: "_"
+        separator: "#"
         msg: ${{ github.ref }}
     - uses: actions/checkout@v3
       with:
@@ -66,13 +66,13 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
   geoserver_data:
-    if: ${{ contains(github.ref, 'geoserver_data_') }}
+    if: ${{ contains(github.ref, 'geoserver_data#') }}
     runs-on: ubuntu-latest
     steps:
     - uses: winterjung/split@v2
       id: split
       with:
-        separator: "_"
+        separator: "#"
         msg: ${{ github.ref }}
     - uses: actions/checkout@v3
       with:
@@ -86,13 +86,13 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
   letsencrypt:
-    if: ${{ contains(github.ref, 'letsencrypt_') }}
+    if: ${{ contains(github.ref, 'letsencrypt#') }}
     runs-on: ubuntu-latest
     steps:
     - uses: winterjung/split@v2
       id: split
       with:
-        separator: "_"
+        separator: "#"
         msg: ${{ github.ref }}
     - uses: actions/checkout@v3
       with:
