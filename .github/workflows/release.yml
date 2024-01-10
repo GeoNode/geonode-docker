@@ -81,7 +81,7 @@ jobs:
       with:
         image: "geoserver_data"
         branch: ${{ github.ref }}
-        tag: ${{ steps.split.outputs._2 }}
+        tag: ${{ steps.split.outputs._1 }}
         push: true
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
