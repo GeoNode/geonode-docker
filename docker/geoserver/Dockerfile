@@ -1,4 +1,4 @@
-ARG IMAGE_VERSION=9.0-jdk11-openjdk-slim-bullseye
+ARG IMAGE_VERSION=9.0.85-jdk11-temurin-focal
 ARG JAVA_HOME=/usr/local/openjdk-11
 FROM tomcat:$IMAGE_VERSION
 LABEL GeoNode Development Team
