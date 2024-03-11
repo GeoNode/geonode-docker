@@ -10,7 +10,7 @@ ARG GEOSERVER_CORS_ALLOWED_HEADERS=*
 #
 # Set GeoServer version and data directory
 #
-ENV GEOSERVER_VERSION=2.23.3
+ENV GEOSERVER_VERSION=2.24.2
 ENV GEOSERVER_DATA_DIR="/geoserver_data/data"
 ENV GEOSERVER_CORS_ENABLED=$GEOSERVER_CORS_ENABLED
 ENV GEOSERVER_CORS_ALLOWED_ORIGINS=$GEOSERVER_CORS_ALLOWED_ORIGINS
@@ -28,15 +28,13 @@ RUN cd /usr/local/tomcat/webapps \
 
 VOLUME $GEOSERVER_DATA_DIR
 
-# added by simonelanucara https://github.com/simonelanucara
-# Optionally add JAI, ImageIO and Marlin Render for improved Geoserver performance
-WORKDIR /tmp
-
-RUN wget --no-check-certificate https://repo1.maven.org/maven2/org/postgis/postgis-jdbc/1.3.3/postgis-jdbc-1.3.3.jar -O postgis-jdbc-1.3.3.jar && \
-    wget --no-check-certificate https://maven.geo-solutions.it/org/hibernatespatial/hibernate-spatial-postgis/1.1.3.2/hibernate-spatial-postgis-1.1.3.2.jar -O hibernate-spatial-postgis-1.1.3.2.jar && \
-    rm /usr/local/tomcat/webapps/geoserver/WEB-INF/lib/hibernate-spatial-h2-geodb-1.1.3.2.jar && \
-    mv hibernate-spatial-postgis-1.1.3.2.jar /usr/local/tomcat/webapps/geoserver/WEB-INF/lib/ && \
-    mv postgis-jdbc-1.3.3.jar /usr/local/tomcat/webapps/geoserver/WEB-INF/lib/
+# no longer used since 2.24.2
+#ENV GEOSERVER_LIB_DIR="/usr/local/tomcat/webapps/geoserver/WEB-INF/lib"
+#RUN wget --no-check-certificate https://repo1.maven.org/maven2/org/postgis/postgis-jdbc/1.3.3/postgis-jdbc-1.3.3.jar -O postgis-jdbc-1.3.3.jar && \
+#    wget --no-check-certificate https://maven.geo-solutions.it/org/hibernatespatial/hibernate-spatial-postgis/1.1.3.2/hibernate-spatial-postgis-1.1.3.2.jar -O hibernate-spatial-postgis-1.1.3.2.jar && \
+#    rm $GEOSERVER_LIB_DIR/hibernate-spatial-h2-geodb-1.1.3.2.jar && \
+#    mv hibernate-spatial-postgis-1.1.3.2.jar $GEOSERVER_LIB_DIR && \
+#    mv postgis-jdbc-1.3.3.jar $GEOSERVER_LIB_DIR
 
 
 # copy the script and perform the run of scripts from entrypoint.sh

@@ -15,7 +15,7 @@ services:
     restart: on-failure
 
   geoserver:
-    image: geonode/geoserver:2.23.3
+    image: geonode/geoserver:2.24.2
     build:
       context: .
     links:
@@ -39,7 +39,7 @@ services:
     restart: on-failure
 
   data-dir-conf:
-    image: geonode/geoserver_data:2.23.3
+    image: geonode/geoserver_data:2.24.2
     container_name: geoserver_data_dir # named data container
     entrypoint: sleep infinity
     volumes:
