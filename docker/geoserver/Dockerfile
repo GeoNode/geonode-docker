@@ -40,19 +40,21 @@ VOLUME $GEOSERVER_DATA_DIR
 # copy the script and perform the run of scripts from entrypoint.sh
 RUN mkdir -p /usr/local/tomcat/tmp
 WORKDIR /usr/local/tomcat/tmp
-COPY set_geoserver_auth.sh /usr/local/tomcat/tmp
-COPY entrypoint.sh /usr/local/tomcat/tmp
-COPY tasks.py /usr/local/tomcat/tmp
+COPY set_geoserver_auth.sh \
+     entrypoint.sh \
+     tasks.py \
+     multidump.sh \
+     multidump-alt.sh \
+     /usr/local/tomcat/tmp
+
 COPY ./templates /templates
-COPY multidump.sh /usr/local/tomcat/tmp
-COPY multidump-alt.sh /usr/local/tomcat/tmp
 
-RUN chmod +x /usr/local/tomcat/tmp/set_geoserver_auth.sh \
-    && chmod +x /usr/local/tomcat/tmp/entrypoint.sh
+RUN chmod +x \
+        /usr/local/tomcat/tmp/set_geoserver_auth.sh \
+        /usr/local/tomcat/tmp/entrypoint.sh
 
-RUN apt-get update \
-    && apt-get install -y procps less \
-    && apt-get install -y python3 python3-pip python3-dev
+RUN apt-get install -y procps less && \
+    apt-get install -y python3 python3-pip python3-dev
 
 RUN pip install j2cli invoke==2.2.0 requests==2.31.0
 
