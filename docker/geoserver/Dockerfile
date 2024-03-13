@@ -10,7 +10,7 @@ ARG GEOSERVER_CORS_ALLOWED_HEADERS=*
 #
 # Set GeoServer version and data directory
 #
-ENV GEOSERVER_VERSION=2.23.3
+ENV GEOSERVER_VERSION=2.24.2
 ENV GEOSERVER_DATA_DIR="/geoserver_data/data"
 ENV GEOSERVER_CORS_ENABLED=$GEOSERVER_CORS_ENABLED
 ENV GEOSERVER_CORS_ALLOWED_ORIGINS=$GEOSERVER_CORS_ALLOWED_ORIGINS
@@ -28,33 +28,33 @@ RUN cd /usr/local/tomcat/webapps \
 
 VOLUME $GEOSERVER_DATA_DIR
 
-# added by simonelanucara https://github.com/simonelanucara
-# Optionally add JAI, ImageIO and Marlin Render for improved Geoserver performance
-WORKDIR /tmp
-
-RUN wget --no-check-certificate https://repo1.maven.org/maven2/org/postgis/postgis-jdbc/1.3.3/postgis-jdbc-1.3.3.jar -O postgis-jdbc-1.3.3.jar && \
-    wget --no-check-certificate https://maven.geo-solutions.it/org/hibernatespatial/hibernate-spatial-postgis/1.1.3.2/hibernate-spatial-postgis-1.1.3.2.jar -O hibernate-spatial-postgis-1.1.3.2.jar && \
-    rm /usr/local/tomcat/webapps/geoserver/WEB-INF/lib/hibernate-spatial-h2-geodb-1.1.3.2.jar && \
-    mv hibernate-spatial-postgis-1.1.3.2.jar /usr/local/tomcat/webapps/geoserver/WEB-INF/lib/ && \
-    mv postgis-jdbc-1.3.3.jar /usr/local/tomcat/webapps/geoserver/WEB-INF/lib/
+# no longer used since 2.24.2
+#ENV GEOSERVER_LIB_DIR="/usr/local/tomcat/webapps/geoserver/WEB-INF/lib"
+#RUN wget --no-check-certificate https://repo1.maven.org/maven2/org/postgis/postgis-jdbc/1.3.3/postgis-jdbc-1.3.3.jar -O postgis-jdbc-1.3.3.jar && \
+#    wget --no-check-certificate https://maven.geo-solutions.it/org/hibernatespatial/hibernate-spatial-postgis/1.1.3.2/hibernate-spatial-postgis-1.1.3.2.jar -O hibernate-spatial-postgis-1.1.3.2.jar && \
+#    rm $GEOSERVER_LIB_DIR/hibernate-spatial-h2-geodb-1.1.3.2.jar && \
+#    mv hibernate-spatial-postgis-1.1.3.2.jar $GEOSERVER_LIB_DIR && \
+#    mv postgis-jdbc-1.3.3.jar $GEOSERVER_LIB_DIR
 
 
 # copy the script and perform the run of scripts from entrypoint.sh
 RUN mkdir -p /usr/local/tomcat/tmp
 WORKDIR /usr/local/tomcat/tmp
-COPY set_geoserver_auth.sh /usr/local/tomcat/tmp
-COPY entrypoint.sh /usr/local/tomcat/tmp
-COPY tasks.py /usr/local/tomcat/tmp
+COPY set_geoserver_auth.sh \
+     entrypoint.sh \
+     tasks.py \
+     multidump.sh \
+     multidump-alt.sh \
+     /usr/local/tomcat/tmp
+
 COPY ./templates /templates
-COPY multidump.sh /usr/local/tomcat/tmp
-COPY multidump-alt.sh /usr/local/tomcat/tmp
 
-RUN chmod +x /usr/local/tomcat/tmp/set_geoserver_auth.sh \
-    && chmod +x /usr/local/tomcat/tmp/entrypoint.sh
+RUN chmod +x \
+        /usr/local/tomcat/tmp/set_geoserver_auth.sh \
+        /usr/local/tomcat/tmp/entrypoint.sh
 
-RUN apt-get update \
-    && apt-get install -y procps less \
-    && apt-get install -y python3 python3-pip python3-dev
+RUN apt-get install -y procps less && \
+    apt-get install -y python3 python3-pip python3-dev
 
 RUN pip install j2cli invoke==2.2.0 requests==2.31.0
 
