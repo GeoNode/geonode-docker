@@ -62,7 +62,7 @@ location /geoserver {
 
 # GeoNode
 location /static/ {
-  alias /mnt/volumes/statics/static/;
+  alias $STATIC_ROOT;
 
   location ~* \.(?:html|js|jpg|jpeg|gif|png|css|tgz|gz|rar|bz2|doc|pdf|ppt|tar|wav|bmp|ttf|rtf|swf|ico|flv|txt|woff|woff2|svg|xml)$ {
       gzip_static always;
@@ -74,7 +74,7 @@ location /static/ {
 }
 
 location /uploaded/ {
-  alias /mnt/volumes/statics/uploaded/;
+  alias $MEDIA_ROOT;
 
   location ~* \.(?:html|js|jpg|jpeg|gif|png|css|tgz|gz|rar|bz2|doc|pdf|ppt|tar|wav|bmp|ttf|rtf|swf|ico|flv|txt|woff|woff2|svg|xml)$ {
       gzip_static always;
