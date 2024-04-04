@@ -44,10 +44,12 @@ export GEONODE_LB_PORT=${GEONODE_LB_PORT:-8000}
 export GEOSERVER_LB_HOST_IP=${GEOSERVER_LB_HOST_IP:-geoserver}
 export GEOSERVER_LB_PORT=${GEOSERVER_LB_PORT:-8080}
 
-echo "Replacing environement variables"
-envsubst '\$HTTP_HOST \$HTTPS_HOST \$HTTP_SCHEME \$GEONODE_LB_HOST_IP \$GEONODE_LB_PORT \$GEOSERVER_LB_HOST_IP \$GEOSERVER_LB_PORT \$RESOLVER' < /etc/nginx/nginx.conf.envsubst > /etc/nginx/nginx.conf
-envsubst '\$HTTP_HOST \$HTTPS_HOST \$HTTP_SCHEME \$GEONODE_LB_HOST_IP \$GEONODE_LB_PORT \$GEOSERVER_LB_HOST_IP \$GEOSERVER_LB_PORT \$RESOLVER' < /etc/nginx/nginx.https.available.conf.envsubst > /etc/nginx/nginx.https.available.conf
-envsubst '\$HTTP_HOST \$HTTPS_HOST \$HTTP_SCHEME \$GEONODE_LB_HOST_IP \$GEONODE_LB_PORT \$GEOSERVER_LB_HOST_IP \$GEOSERVER_LB_PORT' < /etc/nginx/sites-enabled/geonode.conf.envsubst > /etc/nginx/sites-enabled/geonode.conf
+defined_envs=$(printf '${%s} ' $(env | cut -d= -f1))
+
+echo "Replacing environment variables"
+envsubst "$defined_envs" < /etc/nginx/nginx.conf.envsubst > /etc/nginx/nginx.conf
+envsubst "$defined_envs" < /etc/nginx/nginx.https.available.conf.envsubst > /etc/nginx/nginx.https.available.conf
+envsubst "$defined_envs" < /etc/nginx/sites-enabled/geonode.conf.envsubst > /etc/nginx/sites-enabled/geonode.conf
 
 echo "Enabling or not https configuration"
 if [ -z "${HTTPS_HOST}" ]; then
