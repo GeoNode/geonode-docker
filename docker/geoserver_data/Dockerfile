@@ -9,7 +9,7 @@ RUN mkdir -p /tmp/geonode/downloaded
 ENV TEMP_DOWNLOADED /tmp/geonode/downloaded
 WORKDIR ${TEMP_DOWNLOADED}
 
-ENV GEOSERVER_VERSION=2.24.4
+ENV GEOSERVER_VERSION=2.24.5
 
 ADD download.sh ${TEMP_DOWNLOADED}
 RUN chmod +x ${TEMP_DOWNLOADED}/download.sh
