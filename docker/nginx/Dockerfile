@@ -1,4 +1,5 @@
-FROM nginx:1.25.3-alpine
+ARG NGINX_VERSION=1.25.3
+FROM nginx:${NGINX_VERSION}-alpine
 
 RUN apk add --no-cache openssl inotify-tools vim
 
