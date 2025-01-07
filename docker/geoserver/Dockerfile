@@ -3,6 +3,7 @@ ARG JAVA_HOME=/usr/local/openjdk-11
 FROM tomcat:$IMAGE_VERSION
 LABEL GeoNode Development Team
 
+ARG GEOSERVER_VERSION=2.24.5
 ARG GEOSERVER_CORS_ENABLED=False
 ARG GEOSERVER_CORS_ALLOWED_ORIGINS=*
 ARG GEOSERVER_CORS_ALLOWED_METHODS=GET,POST,PUT,DELETE,HEAD,OPTIONS
@@ -10,7 +11,7 @@ ARG GEOSERVER_CORS_ALLOWED_HEADERS=*
 #
 # Set GeoServer version and data directory
 #
-ENV GEOSERVER_VERSION=2.24.5
+ENV GEOSERVER_VERSION=${GEOSERVER_VERSION}
 ENV GEOSERVER_DATA_DIR="/geoserver_data/data"
 ENV GEOSERVER_CORS_ENABLED=$GEOSERVER_CORS_ENABLED
 ENV GEOSERVER_CORS_ALLOWED_ORIGINS=$GEOSERVER_CORS_ALLOWED_ORIGINS
@@ -45,7 +46,7 @@ COPY set_geoserver_auth.sh \
      tasks.py \
      multidump.sh \
      multidump-alt.sh \
-     /usr/local/tomcat/tmp
+     /usr/local/tomcat/tmp/
 
 COPY ./templates /templates
 
