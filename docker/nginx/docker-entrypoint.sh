@@ -62,7 +62,6 @@ envsubst "$defined_envs" < /etc/nginx/nginx.conf.envsubst > /etc/nginx/nginx.con
 envsubst "$defined_envs" < /etc/nginx/nginx.https.available.conf.envsubst > /etc/nginx/nginx.https.available.conf
 envsubst "$defined_envs" < /etc/nginx/sites-enabled/geonode.conf.envsubst > /etc/nginx/sites-enabled/geonode.conf
 
-
 echo "Enabling or not https configuration"
 if [ -z "${HTTPS_HOST}" ]; then
         echo "" > /etc/nginx/nginx.https.enabled.conf
