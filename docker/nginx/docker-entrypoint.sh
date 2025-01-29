@@ -34,8 +34,18 @@ fi
 
 if [ -z "${HTTPS_HOST}" ]; then
         HTTP_SCHEME="http"
+        if [ $HTTP_PORT = "80" ]; then
+                PUBLIC_HOST=${HTTP_HOST}
+        else
+                PUBLIC_HOST="$HTTP_HOST:$HTTP_PORT"
+        fi
 else
         HTTP_SCHEME="https"
+        if [ $HTTPS_PORT = "443" ]; then
+                PUBLIC_HOST=${HTTPS_HOST}
+        else
+                PUBLIC_HOST="$HTTPS_HOST:$HTTPS_PORT"
+        fi
 fi
 
 export HTTP_SCHEME=${HTTP_SCHEME:-http}
@@ -43,6 +53,7 @@ export GEONODE_LB_HOST_IP=${GEONODE_LB_HOST_IP:-django}
 export GEONODE_LB_PORT=${GEONODE_LB_PORT:-8000}
 export GEOSERVER_LB_HOST_IP=${GEOSERVER_LB_HOST_IP:-geoserver}
 export GEOSERVER_LB_PORT=${GEOSERVER_LB_PORT:-8080}
+export PUBLIC_HOST=${PUBLIC_HOST}
 
 defined_envs=$(printf '${%s} ' $(env | cut -d= -f1))
 
@@ -50,6 +61,7 @@ echo "Replacing environment variables"
 envsubst "$defined_envs" < /etc/nginx/nginx.conf.envsubst > /etc/nginx/nginx.conf
 envsubst "$defined_envs" < /etc/nginx/nginx.https.available.conf.envsubst > /etc/nginx/nginx.https.available.conf
 envsubst "$defined_envs" < /etc/nginx/sites-enabled/geonode.conf.envsubst > /etc/nginx/sites-enabled/geonode.conf
+
 
 echo "Enabling or not https configuration"
 if [ -z "${HTTPS_HOST}" ]; then
