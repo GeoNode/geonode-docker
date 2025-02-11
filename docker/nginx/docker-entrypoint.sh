@@ -55,6 +55,14 @@ export GEOSERVER_LB_HOST_IP=${GEOSERVER_LB_HOST_IP:-geoserver}
 export GEOSERVER_LB_PORT=${GEOSERVER_LB_PORT:-8080}
 export PUBLIC_HOST=${PUBLIC_HOST}
 
+# Set Access-Control-Allow-Origin based on CORS_ALLOW_ALL_ORIGINS
+if [ "$(echo ${CORS_ALLOW_ALL_ORIGINS} | tr '[:upper:]' '[:lower:]')" = "true" ]; then
+    export NGINX_ALLOW_ORIGIN="*"
+else
+    NGINX_ALLOW_ORIGIN=$(echo "${SITEURL}" | sed -e 's|^https\?://||' -e 's|/$||')
+    export NGINX_ALLOW_ORIGIN
+fi
+
 defined_envs=$(printf '${%s} ' $(env | cut -d= -f1))
 
 echo "Replacing environment variables"
