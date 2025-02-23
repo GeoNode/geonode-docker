@@ -15,6 +15,8 @@ services:
     image: geonode/geoserver:2.24.x
     build:
       context: .
+      args:
+        GEOSERVER_VERSION: 2.24.x
     links:
       - postgis
     ports:
@@ -47,6 +49,8 @@ services:
     image: geonode/geoserver_data:2.24.x
     build:
       context: ../geoserver_data
+      args:
+        GEOSERVER_VERSION: 2.24.x
     command: ["sleep", "infinity"]
     volumes:
       - data:/geoserver_data/data
