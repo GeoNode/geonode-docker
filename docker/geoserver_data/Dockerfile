@@ -1,26 +1,30 @@
 FROM alpine:latest
 ARG GEOSERVER_VERSION=2.24.x
-LABEL GeoNode development team
+ARG BASE_GEOSERVER_DATA_DIR=/geoserver_data
 
-# Install curl in alpine 3.3+
-RUN apk --no-cache add curl
+# Some label best practices
+# https://www.docker.com/blog/docker-best-practices-using-tags-and-labels-to-manage-docker-image-sprawl/
+LABEL org.opencontainers.image.title="GeoNode's Geoserver Data image" \
+    org.opencontainers.image.version=${GEOSERVER_VERSION} \
+    org.opencontainers.image.vendor="GeoNode Development Team"
 
-# Download required files
-RUN mkdir -p /tmp/geonode/downloaded
-ENV TEMP_DOWNLOADED /tmp/geonode/downloaded
+ENV TEMP_DOWNLOADED=/tmp/geonode/downloaded \
+    GEOSERVER_VERSION=${GEOSERVER_VERSION}
+
 WORKDIR ${TEMP_DOWNLOADED}
 
-ENV GEOSERVER_VERSION=${GEOSERVER_VERSION}
+COPY download.sh .
 
-ADD download.sh ${TEMP_DOWNLOADED}
-RUN chmod +x ${TEMP_DOWNLOADED}/download.sh
-RUN ${TEMP_DOWNLOADED}/download.sh $GEOSERVER_VERSION $TEMP_DOWNLOADED
-
-# for debugging
-RUN ls -lart
+# Download required files
+RUN apk --no-cache add curl && \
+    chmod +x download.sh && \
+    sh download.sh $GEOSERVER_VERSION $TEMP_DOWNLOADED && \
+    # for debugging
+    ls -lart
 
 # preparing the volume
-ENV BASE_GEOSERVER_DATA_DIR /geoserver_data
-RUN mkdir -p ${BASE_GEOSERVER_DATA_DIR}
-RUN cp -r ${TEMP_DOWNLOADED}/data ${BASE_GEOSERVER_DATA_DIR}
+RUN mkdir -p ${BASE_GEOSERVER_DATA_DIR} && \
+    cp -r ${TEMP_DOWNLOADED}/data ${BASE_GEOSERVER_DATA_DIR} && \
+    chmod -R g=u ${BASE_GEOSERVER_DATA_DIR}/data
+
 VOLUME ${BASE_GEOSERVER_DATA_DIR}/data
