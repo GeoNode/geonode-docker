@@ -1,0 +1,10 @@
+version: '3.9'
+
+services:
+  geoserver:
+    image: geonode/geoserver:dev
+  data-dir-conf:
+    image: geonode/geoserver_data:dev
+  postgis:
+    ports:
+      - "5432:5432"

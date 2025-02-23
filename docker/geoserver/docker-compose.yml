@@ -1,15 +1,12 @@
 version: '3.9'
 
 services:
-
   postgis:
-    image: geonode/postgis:13
-    ports:
-      - "25432:5432"
+    image: geonode/postgis:15.3-latest
+    environment:
+      POSTGRES_PASSWORD: postgres
     volumes:
-      - /srv/docker/geoserver/postgis:/var/lib/postgresql
-    #volumes_from:
-      #- pgstore
+     - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: "pg_isready -d postgres -U postgres"
     restart: on-failure
@@ -23,31 +20,41 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - /geoserver_data/data
+      - data:/geoserver_data/data
     environment:
-      - NGINX_BASE_URL=http://localhost
+      NGINX_BASE_URL: http://localhost
+      # GEOSERVER_CORS_ENABLED: true
+      # GEOSERVER_CORS_ALLOWED_ORIGINS: localhost
+      # GEOSERVER_CORS_ALLOWED_METHODS: GET,POST,PUT,DELETE,HEAD,OPTIONS
+      # GEOSERVER_CORS_ALLOWED_HEADERS: "*"
+      # INVOKE_LOG_STDOUT: false
+      # FORCE_REINIT: true
     depends_on:
       postgis:
-        condition: service_completed_successfully
+        condition: service_healthy
       data-dir-conf:
         condition: service_healthy
+    user: '1000'
     healthcheck:
-      test: curl --fail -s http://localhost:8080/geoserver/rest/workspaces/geonode.html || exit 1
-      interval: 1m30s
+      # geoserver can't test with rest, because it needs authorization.
+      test: curl --fail -s http://localhost:8080/geoserver/index.html || exit 1
+      interval: 30s
       timeout: 10s
       retries: 3
     restart: on-failure
 
   data-dir-conf:
     image: geonode/geoserver_data:2.24.x
-    container_name: geoserver_data_dir # named data container
-    entrypoint: sleep infinity
+    build:
+      context: ../geoserver_data
+    command: ["sleep", "infinity"]
     volumes:
-      - /geoserver_data/data
+      - data:/geoserver_data/data
     healthcheck:
       test: "ls -A '/geoserver_data/data' | wc -l"
     restart: on-failure
 
 volumes:
   # reference to the named data container that holds the preloaded geoserver data directory
-  geoserver_data_dir:
+  data:
+  pgdata:
