@@ -2,12 +2,34 @@
 
 auth_conf_source="$1"
 auth_conf_target="$2"
+
 # Creating a temporary file for sed to write the changes to
 temp_file="xml.tmp"
 touch $temp_file
 
-source /root/.bashrc
-source /root/.override_env
+# check if user exists in passwd file
+# if not, change HOME to /tmp
+_USER=$(id -u)
+if [ $(getent passwd $_USER) ]; then
+    echo "User $_USER exists in passwd file"
+else
+    echo "User does not exist in passwd file, changing HOME to /tmp"
+    export HOME=/tmp
+fi
+unset _USER
+
+# Preserving the original behavior. 
+if [ ! -e $HOME/.bashrc ]; then
+    echo "No $HOME/.bashrc found, getting default from skeleton"
+    cp /etc/skel/.bashrc $HOME/.bashrc
+fi
+
+source $HOME/.bashrc
+
+# Load the environment variables, if exists
+if [ -e $HOME/.override_env ]; then
+    source $HOME/.override_env
+fi
 
 test -z "$auth_conf_source" && echo "You must specify a source file" && exit 1
 test -z "$auth_conf_target" && echo "You must specify a target conf directory" && exit 1
