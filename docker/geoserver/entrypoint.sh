@@ -3,14 +3,19 @@ set -e
 
 # check if user exists in passwd file
 # if not, change HOME to /tmp
-_USER=$(id -u)
-if [ $(getent passwd $_USER) ]; then
+HAS_USER=$(getent passwd $(id -u) | wc -l)
+if [ $HAS_USER -eq 1 ]; then
     echo "User $_USER exists in passwd file"
+
+    if [ $HOME = "/" ]; then
+        echo "HOME is /, changing to /tmp"
+        export HOME=/tmp
+    fi
 else
     echo "User does not exist in passwd file, changing HOME to /tmp"
     export HOME=/tmp
 fi
-unset _USER
+unset HAS_USER
 
 # Preserving the original behavior. 
 if [ ! -e $HOME/.bashrc ]; then
