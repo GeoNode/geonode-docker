@@ -12,7 +12,11 @@ COPY nginx.https.available.conf.envsubst ./https/
 COPY geonode.conf.envsubst ./sites-enabled/
 COPY docker-autoreload.sh docker-entrypoint.sh /
 
-RUN mkdir -p /geonode-certificates/{disabled,staging,production,autoissued} && \
+RUN mkdir -p \
+        /geonode-certificates/disabled \
+        /geonode-certificates/staging \
+        /geonode-certificates/production \
+        /geonode-certificates/autoissued && \
     mv nginx.conf nginx.conf.orig && \
     touch nginx.conf && \
     chmod -R g=u \
