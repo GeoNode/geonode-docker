@@ -15,13 +15,13 @@ do
 
         echo "Creating symbolic link for WAN host"
         # for some reason, the ln -f flag doesn't work below...
-        rm -f /certificate_symlink
+        rm -f /tmp/certificate_symlink
         if [ -f "/geonode-certificates/$LETSENCRYPT_MODE/live/$HTTPS_HOST/fullchain.pem" ] && [ -f "/geonode-certificates/$LETSENCRYPT_MODE/live/$HTTPS_HOST/privkey.pem" ]; then
                 echo "Certbot certificate exists, we symlink to the live cert"
-                ln -sf "/geonode-certificates/$LETSENCRYPT_MODE/live/$HTTPS_HOST" /certificate_symlink
+                ln -sf "/geonode-certificates/$LETSENCRYPT_MODE/live/$HTTPS_HOST" /tmp/certificate_symlink
         else
                 echo "Certbot certificate does not exist, we symlink to autoissued"
-                ln -sf "/geonode-certificates/autoissued" /certificate_symlink
+                ln -sf "/geonode-certificates/autoissued" /tmp/certificate_symlink
         fi
 
         # Test nginx configuration
