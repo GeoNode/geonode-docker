@@ -7,7 +7,7 @@ ssl_session_timeout 10m;
 
 # this is the actual HTTPS host
 server {
-    listen              443 ssl;
+    listen              8443 ssl;
     server_name         $HTTPS_HOST;
     keepalive_timeout   70;
 
@@ -21,7 +21,7 @@ server {
 
 # if we try to connect from http, we redirect to https
 server {
-    listen 80;
+    listen 8080;
     server_name $HTTPS_HOST $HTTP_HOST; # TODO : once geoserver supports relative urls, we should allow access though both HTTP and HTTPS at the same time and hence remove HTTP_HOST from this line
     
     # Except for let's encrypt challenge
