@@ -245,5 +245,6 @@ if [ ${FORCE_REINIT} = "true" ]  || [ ${FORCE_REINIT} = "True" ] || [ ! -e "${GE
     nohup sh -c "invoke configure-geoserver" &
 fi
 
+JAVA_OPTS="${JAVA_OPTS} -DENTITY_RESOLUTION_ALLOWLIST='[www.w3.org](http://www.w3.org/)|[schemas.opengis.net](http://schemas.opengis.net/)|[www.opengis.net](http://www.opengis.net/)|[inspire.ec.europa.eu/schemas](http://inspire.ec.europa.eu/schemas)'"
 # start tomcat
 exec env JAVA_OPTS="${JAVA_OPTS}" catalina.sh run
