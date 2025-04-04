@@ -1,5 +1,3 @@
-include /etc/nginx/mime.types;
-
 # This is the main geonode conf
 charset     utf-8;
 
