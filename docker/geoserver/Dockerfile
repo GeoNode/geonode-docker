@@ -1,4 +1,4 @@
-ARG IMAGE_VERSION=9.0.90-jdk11-temurin-focal
+ARG IMAGE_VERSION=9.0.104-jdk11-temurin-jammy
 ARG JAVA_HOME=/usr/local/openjdk-11
 FROM tomcat:$IMAGE_VERSION
 LABEL GeoNode Development Team
