@@ -15,6 +15,16 @@ invoke () {
     echo "$@ tasks done"
 }
 
+
+mkdir -p $GEOSERVER_DATA_DIR
+if [ -z "$( ls -A ${GEOSERVER_DATA_DIR} )" ];
+then
+    echo "${GEOSERVER_DATA_DIR} is empty. It will be populated with the default datadir content"
+    cp -r ${TEMP_DOWNLOADED}/data/* ${GEOSERVER_DATA_DIR}
+else
+    echo "${GEOSERVER_DATA_DIR} is already populated. It won't be touched"
+fi
+
 # control the values of LB settings if present
 if [ -n "$GEONODE_LB_HOST_IP" ];
 then
