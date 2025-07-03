@@ -30,15 +30,6 @@ RUN cd /usr/local/tomcat/webapps \
 
 VOLUME $GEOSERVER_DATA_DIR
 
-# no longer used since 2.24.2
-#ENV GEOSERVER_LIB_DIR="/usr/local/tomcat/webapps/geoserver/WEB-INF/lib"
-#RUN wget --no-check-certificate https://repo1.maven.org/maven2/org/postgis/postgis-jdbc/1.3.3/postgis-jdbc-1.3.3.jar -O postgis-jdbc-1.3.3.jar && \
-#    wget --no-check-certificate https://maven.geo-solutions.it/org/hibernatespatial/hibernate-spatial-postgis/1.1.3.2/hibernate-spatial-postgis-1.1.3.2.jar -O hibernate-spatial-postgis-1.1.3.2.jar && \
-#    rm $GEOSERVER_LIB_DIR/hibernate-spatial-h2-geodb-1.1.3.2.jar && \
-#    mv hibernate-spatial-postgis-1.1.3.2.jar $GEOSERVER_LIB_DIR && \
-#    mv postgis-jdbc-1.3.3.jar $GEOSERVER_LIB_DIR
-
-
 # copy the script and perform the run of scripts from entrypoint.sh
 RUN mkdir -p /usr/local/tomcat/tmp
 WORKDIR /usr/local/tomcat/tmp
