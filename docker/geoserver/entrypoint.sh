@@ -240,15 +240,6 @@ if [ "${GEOSERVER_CORS_ENABLED}" = "true" ] || [ "${GEOSERVER_CORS_ENABLED}" = "
   fi
 fi
 
-echo '<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
-<beans>
-  <bean id="SldXmlReaderExclusionFilter" class="org.geoserver.platform.ClassExclusionFilter">
-    <property name="beanClass" value="org.geoserver.rest.catalog.AdminRequestCallback" />
-  </bean>
-</beans>' \
-> /usr/local/tomcat/webapps/geoserver/WEB-INF/classes/applicationContext.xml
-
 if [ ${FORCE_REINIT} = "true" ]  || [ ${FORCE_REINIT} = "True" ] || [ ! -e "${GEOSERVER_DATA_DIR}/geoserver_init.lock" ]; then
     # Run async configuration, it needs Geoserver to be up and running
     # executes step configure-geoserver from task.py file
