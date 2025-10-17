@@ -28,6 +28,8 @@ RUN cd /usr/local/tomcat/webapps \
     && rm geoserver.war \
     && mkdir -p $GEOSERVER_DATA_DIR
 
+COPY applicationContext.xml /usr/local/tomcat/webapps/geoserver/WEB-INF/classes/applicationContext.xml
+
 VOLUME $GEOSERVER_DATA_DIR
 
 # copy the script and perform the run of scripts from entrypoint.sh
