@@ -3,7 +3,7 @@ version: '2'
 services:
   data_dir_conf:
     build: .
-    image: geonode/geoserver_data:2.27.2-latest
+    image: geonode/geoserver_data:2.27.3-latest
     container_name: geoserver_data_dir
     command: /bin/true
     volumes:
