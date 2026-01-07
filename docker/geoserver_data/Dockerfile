@@ -1,13 +1,12 @@
 FROM alpine:latest
-ARG GEOSERVER_VERSION=2.27.3
-LABEL GeoNode development team
+ARG GEOSERVER_VERSION=2.27.4
 
 # Install curl in alpine 3.3+
 RUN apk --no-cache add curl
 
 # Download required files
 RUN mkdir -p /tmp/geonode/downloaded
-ENV TEMP_DOWNLOADED /tmp/geonode/downloaded
+ENV TEMP_DOWNLOADED=/tmp/geonode/downloaded
 WORKDIR ${TEMP_DOWNLOADED}
 
 ENV GEOSERVER_VERSION=${GEOSERVER_VERSION}
@@ -20,7 +19,7 @@ RUN ${TEMP_DOWNLOADED}/download.sh $GEOSERVER_VERSION $TEMP_DOWNLOADED
 RUN ls -lart
 
 # preparing the volume
-ENV BASE_GEOSERVER_DATA_DIR /geoserver_data
+ENV BASE_GEOSERVER_DATA_DIR=/geoserver_data
 RUN mkdir -p ${BASE_GEOSERVER_DATA_DIR}
 RUN cp -r ${TEMP_DOWNLOADED}/data ${BASE_GEOSERVER_DATA_DIR}
 VOLUME ${BASE_GEOSERVER_DATA_DIR}/data
