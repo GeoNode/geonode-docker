@@ -42,39 +42,42 @@ done
 
 echo "DEBUG: Starting... [Ok]\n"
 
+# Escape a string for safe use in sed's REGEX (pattern) side, given @ delimiter
+escape_regex() {
+    printf '%s' "$1" | sed -e 's/[][\\.^$*+?(){}|@/-]/\\&/g'
+}
+
+# Escape a string for safe use in sed's REPLACEMENT side, given @ delimiter
+escape_replacement() {
+    printf '%s' "$1" | sed -e 's/[\\&@/]/\\&/g'
+}
+
 for i in "${tagname[@]}"
 do
     echo "DEBUG: Working on '$auth_conf_source' for tagname <$i>"
-    # Extracting the value from the <$tagname> element
-    # echo -ne "<$i>$tagvalue</$i>" | xmlstarlet sel -t -m "//a" -v . -n
-    tagvalue=`grep "<$i>.*<.$i>" "$auth_conf_source" | sed -e "s/^.*<$i/<$i/" | cut -f2 -d">"| cut -f1 -d"<"`
-
+    tagvalue=`grep "<$i>.*<.$i>" "$auth_conf_source" | sed -e "s/^.*<$i/<$i/" | cut -f2 -d">" | cut -f1 -d"<"`
     echo "DEBUG: Found the current value for the element <$i> - '$tagvalue'"
 
-    # Setting new substituted value
     case $i in
         authApiKey)
-            echo "DEBUG: Editing '$auth_conf_source' for tagname <$i> and replacing its value with '$OAUTH2_API_KEY'"
-            newvalue=`echo -ne "$tagvalue" | sed -re "s@.*@$OAUTH2_API_KEY@"`;;
+            newvalue="$OAUTH2_API_KEY";;
         cliendId)
-            echo "DEBUG: Editing '$auth_conf_source' for tagname <$i> and replacing its value with '$OAUTH2_CLIENT_ID'"
-            newvalue=`echo -ne "$tagvalue" | sed -re "s@.*@$OAUTH2_CLIENT_ID@"`;;
+            newvalue="$OAUTH2_CLIENT_ID";;
         clientSecret)
-            echo "DEBUG: Editing '$auth_conf_source' for tagname <$i> and replacing its value with '$OAUTH2_CLIENT_SECRET'"
-            newvalue=`echo -ne "$tagvalue" | sed -re "s@.*@$OAUTH2_CLIENT_SECRET@"`;;
+            newvalue="$OAUTH2_CLIENT_SECRET";;
         proxyBaseUrl | redirectUri | userAuthorizationUri | logoutUri )
-            echo "DEBUG: Editing '$auth_conf_source' for tagname <$i> and replacing its value with '$GEOSERVER_LOCATION'"
-            newvalue=`echo -ne "$tagvalue" | sed -re "s@^(https?://[^/]+)@${GEOSERVER_LOCATION%/}@"`;;
+            newvalue=`printf '%s' "$tagvalue" | sed -re "s@^(https?://[^/]+)@${GEOSERVER_LOCATION%/}@"`;;
         baseUrl | accessTokenUri | checkTokenEndpointUrl )
-            echo "DEBUG: Editing '$auth_conf_source' for tagname <$i> and replacing its value with '$GEONODE_LOCATION'"
-            newvalue=`echo -ne "$tagvalue" | sed -re "s@^(https?://[^/]+)@${GEONODE_LOCATION%/}@"`;;
-        *) echo -n "an unknown variable has been found";;
+            newvalue=`printf '%s' "$tagvalue" | sed -re "s@^(https?://[^/]+)@${GEONODE_LOCATION%/}@"`;;
+        *) echo "an unknown variable has been found"; continue;;
     esac
 
     echo "DEBUG: Found the new value for the element <$i> - '$newvalue'"
-    # Replacing element’s value with $SUBSTITUTION_URL
-    # echo -ne "<$i>$tagvalue</$i>" | xmlstarlet sel -t -m "//a" -v . -n
-    sed -e "s@<$i>$tagvalue<\/$i>@<$i>$newvalue<\/$i>@g" "$auth_conf_source" > "$temp_file"
+
+    # Match the whole element (empty or not); only the tag name is interpolated,
+    # so the user-controlled content goes through the escapers.
+    new_esc=`escape_replacement "$newvalue"`
+    sed -E "s@(<$i>)[^<]*(</$i>)@\1${new_esc}\2@g" "$auth_conf_source" > "$temp_file"
     cp "$temp_file" "$auth_conf_source"
 done
 # Writing our changes back to the original file ($auth_conf_source)
