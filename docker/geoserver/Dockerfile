@@ -1,4 +1,4 @@
-ARG IMAGE_VERSION=9.0.117-jdk17-temurin-jammy
+ARG IMAGE_VERSION=9.0.118-jdk17-temurin-jammy
 FROM tomcat:$IMAGE_VERSION
 LABEL GeoNode Development Team
 
