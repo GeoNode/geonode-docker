@@ -48,6 +48,7 @@ else
         fi
 fi
 
+export HTTP2_TOGGLE=${HTTP2_TOGGLE:-on}
 export HTTP_SCHEME=${HTTP_SCHEME:-http}
 export GEONODE_LB_HOST_IP=${GEONODE_LB_HOST_IP:-django}
 export GEONODE_LB_PORT=${GEONODE_LB_PORT:-8000}
