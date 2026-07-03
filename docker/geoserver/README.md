@@ -99,17 +99,6 @@ docker-compose down
 
 Data are completely gone but you can ever start from the base GeoServer Data Directory built for Geonode.
 
-#### Data directory versions
-
-There has to be a correspondence one-to-one between the data directory version and the tag of the GeoServer image used in the Docker compose file. So at the end you can consume these images below:
-
-* **2.9.x**: [geonode/geoserver_data:2.9.x](https://hub.docker.com/r/geonode/geoserver_data/builds/bsus6alnddg4bc7icwymevp/)
-* **2.9.x-oauth2**: [geonode/geoserver_data:2.9.x-oauth2](https://hub.docker.com/r/geonode/geoserver_data/builds/bwkxcupsunvuitzusi9gsnt/)
-* **2.10.x**: [geonode/geoserver_data:2.10.x](https://hub.docker.com/r/geonode/geoserver_data/builds/b5jqhpzapkqxzyevjizccug/)
-* **2.12.x**: [geonode/geoserver_data:2.12.x](https://hub.docker.com/r/geonode/geoserver_data/builds/byaaalw3lnasunpveyg3x4i/)
-* **2.13.x**: [geonode/geoserver_data:2.13.x](https://hub.docker.com/r/geonode/geoserver_data/builds/bunuqzq7a7dk65iumjhkbtc/)
-* **2.14.x**: [geonode/geoserver_data:2.14.x](https://hub.docker.com/r/geonode/geoserver_data/builds/blpdjzkrv7pm3stunzpn4pp/)
-
 ### Database
 
 GeoServer recommends the usage of a spatial database

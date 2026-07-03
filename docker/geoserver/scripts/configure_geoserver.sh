@@ -17,9 +17,8 @@ XML_DATA="<?xml version=\"1.0\" encoding=\"UTF-8\"?><userPassword><newPassword>$
 for cnt in {1..28}; do
     echo "...waiting for GeoServer to pop-up... Attempt ${cnt}"
     
-    # Check if the HTTP endpoint is responsive before attempting PUT
-    if curl -s -I -o /dev/null "${REST_URL/security\/self\/password/info.json}"; then
-        
+    # Check if GeoServer is responding before attempting PUT
+    if curl -fsS -o /dev/null "http://localhost:${GEOSERVER_LB_PORT}/geoserver/"; then
         # Execute the password update request using curl basic auth
         RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
             -u "${GEOSERVER_ADMIN_USER}:${GEOSERVER_FACTORY_PASSWORD}" \
@@ -32,16 +31,20 @@ for cnt in {1..28}; do
 
         if [ "$RESPONSE_CODE" -eq 200 ]; then
             echo "GeoServer admin password updated SUCCESSFULLY!"
+            break
         else
             echo "WARNING: GeoServer admin password *NOT* updated: code [${RESPONSE_CODE}]"
         fi
-        break
     fi
     
     sleep 2
 done
 
-# Initialize the lock file
-echo "************************** Writing init lockfile ********************************"
-mkdir -p "${GEOSERVER_DATA_DIR}"
-date > "${GEOSERVER_DATA_DIR}/geoserver_init.lock"
+# Initialize the lock file only if configuration succeeded
+if [ "${RESPONSE_CODE:-}" -eq 200 ] 2>/dev/null; then
+    echo "************************** Writing init lockfile ********************************"
+    mkdir -p "${GEOSERVER_DATA_DIR}"
+    date > "${GEOSERVER_DATA_DIR}/geoserver_init.lock"
+else
+    echo "WARNING: GeoServer init lockfile not written because password update did not succeed."
+fi
