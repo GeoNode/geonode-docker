@@ -21,8 +21,16 @@ mkdir -p $GEOSERVER_DATA_DIR
 
 if [ ! -f "${GEOSERVER_DATA_DIR}/global.xml" ]; then
     echo "${GEOSERVER_DATA_DIR}/global.xml not found."
-    echo "Extracting default data skeleton archive directly to volume..."    
-    unzip $GEOSERVER_SHARE_DIR/geoserver-data-skeleton.zip -d $GEOSERVER_DATA_DIR/
+
+    # needing a tmp extraction because the zip contains /data/ as root    
+    echo "Extracting default data skeleton archive to temp dir..."
+    TMP_EXTRACT="/tmp/geoserver_unzip"
+    mkdir -p "$TMP_EXTRACT"
+    unzip -q "$GEOSERVER_SHARE_DIR/geoserver-data-skeleton.zip" -d "$TMP_EXTRACT"
+    echo "Moving default data skeleton archive directly to volume..."
+#    mv "$TMP_EXTRACT"/data/* "$TMP_EXTRACT"/data/.* "$GEOSERVER_DATA_DIR/" 2>/dev/null || true
+    mv -v "$TMP_EXTRACT"/data/* "$TMP_EXTRACT"/data/.* "$GEOSERVER_DATA_DIR/" || true
+    rm -rf "$TMP_EXTRACT"
     
     echo "Extraction complete."
 else
@@ -208,16 +216,12 @@ declare -a geoserver_datadir_template_dirs=("geofence")
 
 for template in ${geoserver_datadir_template_dirs[*]}; do
     if [ "$template" == "geofence" ]; then
-        cp -R /templates/$template/* ${GEOSERVER_DATA_DIR}/geofence
+        cp -vR $GEOSERVER_SHARE_DIR/templates/$template/* ${GEOSERVER_DATA_DIR}/geofence
 
-        # Loop through template files matching the new extension
-        for f in $(find ${GEOSERVER_DATA_DIR}/geofence/ -type f -name "*.tmpl"); do
-            echo -e "Evaluating template\n\tSource: $f\n\tDest: ${f%.tmpl}"
-            
-            # Use native envsubst instead of Python's j2cli
-            envsubst < "$f" > "${f%.tmpl}"
-            
-            rm -f "$f"
+        for f in $(find ${GEOSERVER_DATA_DIR}/geofence/ -type f -name "*.envsubst"); do
+            echo -e "Evaluating template\n\tSource: $f\n\tDest: ${f%.envsubst}"
+            envsubst < "$f" > "${f%.envsubst}"        
+            rm -vf "$f"
         done
     fi
 done

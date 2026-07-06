@@ -32,13 +32,13 @@ RUN cd /usr/local/tomcat/webapps \
 # Download datadir zip
 # 
 ENV GEOSERVER_SHARE_DIR="/usr/local/share/geoserver"
-RUN mkdir -p $GEOSERVER_SHARE_DIR
+RUN mkdir -p $GEOSERVER_SHARE_DIR $GEOSERVER_SHARE_DIR/templates
 RUN wget --no-check-certificate --progress=bar:force:noscroll \
     https://artifacts.geonode.org/geoserver/$GEOSERVER_VERSION/geonode-geoserver-ext-web-app-data.zip \
     -O $GEOSERVER_SHARE_DIR/geoserver-data-skeleton.zip
 
 
-COPY ./templates /templates
+COPY ./templates $GEOSERVER_SHARE_DIR/templates
 COPY ./files/applicationContext.xml /usr/local/tomcat/webapps/geoserver/WEB-INF/classes/applicationContext.xml
 COPY ./scripts/ /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
