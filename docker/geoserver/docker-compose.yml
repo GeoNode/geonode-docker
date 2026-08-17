@@ -29,23 +29,11 @@ services:
     depends_on:
       postgis:
         condition: service_completed_successfully
-      data-dir-conf:
-        condition: service_healthy
     healthcheck:
       test: curl --fail -s http://localhost:8080/geoserver/rest/workspaces/geonode.html || exit 1
       interval: 1m30s
       timeout: 10s
       retries: 3
-    restart: on-failure
-
-  data-dir-conf:
-    image: geonode/geoserver_data:2.28.x-latest
-    container_name: geoserver_data_dir # named data container
-    entrypoint: sleep infinity
-    volumes:
-      - /geoserver_data/data
-    healthcheck:
-      test: "ls -A '/geoserver_data/data' | wc -l"
     restart: on-failure
 
 volumes:
