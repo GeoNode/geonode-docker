@@ -35,21 +35,6 @@ Point your browser to `http://localhost:8080/geoserver` and login using GeoServe
 * Username: admin
 * Password: geoserver
 
-## How to use different versions
-
-There are mainly two different versions of this image which are useful for running **GeoNode** with different authentication system types. These versions are released as specific tags for two authentication mechanisms:
-
-**Cookie based authn**:
-- [geonode/geoserver:2.9.x](https://hub.docker.com/r/geonode/geoserver/builds/bx7ydhghnlrfnsppduyva73/)
-
-**Oauth2 based authn**:
-- [geonode/geoserver:2.9.x-oauth2](https://hub.docker.com/r/geonode/geoserver/builds/bwca5rtexeoegzgroavftdr/)
-- [geonode/geoserver:2.10.x](https://hub.docker.com/r/geonode/geoserver/builds/bjohcnc29vm69acqjrvndxf/)
-- [geonode/geoserver:2.12.x](https://hub.docker.com/r/geonode/geoserver/builds/bh7pyw5atmkcljurwsnzbs7/)
-- [geonode/geoserver:2.13.x](https://hub.docker.com/r/geonode/geoserver/builds/btmjctbuvrjfnnrxrs4wyrs/)
-- [geonode/geoserver:2.14.x](https://hub.docker.com/r/geonode/geoserver/builds/bj53pi8he8uksz6ggvrs3wc/)
-
-You can declare what version to use along with the data directory tag which corresponds to the same version.  
 
 ## Configuration
 
@@ -64,14 +49,33 @@ You may want to map this volume to a directory on the host. It will also ease th
 -v /your/host/data/path:/geoserver_data/data
 ```
 
-### Data volume container
+#### GeoServer Data Directory Initialization
 
-In case you are running Compose for automatically having GeoServer up and running then a data volume container will be mounted with a default preloaded *GEOSERVER_DATA_DIR* at the configuration data directory of the container.
-Make sure that the image from the repository [data-docker](https://github.com/GeoNode/data-docker) is available from the [GeoNode Docker Hub](https://hub.docker.com/u/geonode/) or has been built locally:
+When running GeoNode via Docker Compose, the core `geoserver` container automatically manages its own persistent configurations. On the very first boot, if the assigned volume is completely empty, an internal initialization step automatically extracts a preconfigured data archive directly into the volume space.
 
-```bash
-docker build -t geonode/geoserver_data .
+This setup contains the default preloaded `GEOSERVER_DATA_DIR` settings (including custom GeoNode extensions, workspaces, and security providers) required for GeoServer to communicate with Django and the database seamlessly.
+
+#### Customizing or Building the Base Data Directory Locally
+If you need to change the base fallback configuration, alter the default zip asset reference built into the core geoserver image:
+
+```Bash
+docker build --build-arg GEOSERVER_VERSION=2.24.x -t geonode/geoserver:latest ./docker/geoserver
 ```
+
+#### Storage and Persistence
+Because the default configurations are extracted dynamically at runtime, your master `docker-compose.yml` must map a named volume or host directory to the target path:
+
+```YAML
+services:
+  geoserver:
+    image: geonode/geoserver:latest
+    environment:
+      - GEOSERVER_DATA_DIR=/geoserver_data/data
+    volumes:
+      - geoserver-data-dir:/geoserver_data/data
+```      
+Subsequent container restarts will detect the existing configuration files (such as global.xml) and safely skip the extraction phase, ensuring all runtime additions, styles, and layer maps are completely preserved.
+
 
 #### Persistance behavior
 
@@ -94,17 +98,6 @@ docker-compose down
 ```
 
 Data are completely gone but you can ever start from the base GeoServer Data Directory built for Geonode.
-
-#### Data directory versions
-
-There has to be a correspondence one-to-one between the data directory version and the tag of the GeoServer image used in the Docker compose file. So at the end you can consume these images below:
-
-* **2.9.x**: [geonode/geoserver_data:2.9.x](https://hub.docker.com/r/geonode/geoserver_data/builds/bsus6alnddg4bc7icwymevp/)
-* **2.9.x-oauth2**: [geonode/geoserver_data:2.9.x-oauth2](https://hub.docker.com/r/geonode/geoserver_data/builds/bwkxcupsunvuitzusi9gsnt/)
-* **2.10.x**: [geonode/geoserver_data:2.10.x](https://hub.docker.com/r/geonode/geoserver_data/builds/b5jqhpzapkqxzyevjizccug/)
-* **2.12.x**: [geonode/geoserver_data:2.12.x](https://hub.docker.com/r/geonode/geoserver_data/builds/byaaalw3lnasunpveyg3x4i/)
-* **2.13.x**: [geonode/geoserver_data:2.13.x](https://hub.docker.com/r/geonode/geoserver_data/builds/bunuqzq7a7dk65iumjhkbtc/)
-* **2.14.x**: [geonode/geoserver_data:2.14.x](https://hub.docker.com/r/geonode/geoserver_data/builds/blpdjzkrv7pm3stunzpn4pp/)
 
 ### Database
 

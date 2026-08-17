@@ -15,6 +15,28 @@ invoke () {
     echo "$@ tasks done"
 }
 
+
+# create/populate the datadir
+mkdir -p $GEOSERVER_DATA_DIR
+
+if [ ! -f "${GEOSERVER_DATA_DIR}/global.xml" ]; then
+    echo "${GEOSERVER_DATA_DIR}/global.xml not found."
+
+    # needing a tmp extraction because the zip contains /data/ as root    
+    echo "Extracting default data skeleton archive to temp dir..."
+    TMP_EXTRACT="/tmp/geoserver_unzip"
+    mkdir -p "$TMP_EXTRACT"
+    unzip -q "$GEOSERVER_SHARE_DIR/geoserver-data-skeleton.zip" -d "$TMP_EXTRACT"
+    echo "Moving default data skeleton archive directly to volume..."
+#    mv "$TMP_EXTRACT"/data/* "$TMP_EXTRACT"/data/.* "$GEOSERVER_DATA_DIR/" 2>/dev/null || true
+    mv -v "$TMP_EXTRACT"/data/* "$TMP_EXTRACT"/data/.* "$GEOSERVER_DATA_DIR/" || true
+    rm -rf "$TMP_EXTRACT"
+    
+    echo "Extraction complete."
+else
+    echo "Existing GeoServer data configuration detected. Skipping extraction."
+fi
+
 # control the values of LB settings if present
 if [ -n "$GEONODE_LB_HOST_IP" ];
 then
@@ -161,13 +183,13 @@ else
     # backup geonodeAuthProvider config.xml
     cp ${GEOSERVER_DATA_DIR}/security/auth/geonodeAuthProvider/config.xml ${GEOSERVER_DATA_DIR}/security/auth/geonodeAuthProvider/config.xml.orig
     # run the setting script for geonodeAuthProvider
-    /usr/local/tomcat/tmp/set_geoserver_auth.sh ${GEOSERVER_DATA_DIR}/security/auth/geonodeAuthProvider/config.xml ${GEOSERVER_DATA_DIR}/security/auth/geonodeAuthProvider/ ${TAGNAME[@]} > /dev/null 2>&1
+    /usr/local/bin/set_geoserver_auth.sh ${GEOSERVER_DATA_DIR}/security/auth/geonodeAuthProvider/config.xml ${GEOSERVER_DATA_DIR}/security/auth/geonodeAuthProvider/ ${TAGNAME[@]} > /dev/null 2>&1
 fi
 
 # backup geonode REST role service config.xml
 cp "${GEOSERVER_DATA_DIR}/security/role/geonode REST role service/config.xml" "${GEOSERVER_DATA_DIR}/security/role/geonode REST role service/config.xml.orig"
 # run the setting script for geonode REST role service
-/usr/local/tomcat/tmp/set_geoserver_auth.sh "${GEOSERVER_DATA_DIR}/security/role/geonode REST role service/config.xml" "${GEOSERVER_DATA_DIR}/security/role/geonode REST role service/" ${TAGNAME[@]} > /dev/null 2>&1
+/usr/local/bin/set_geoserver_auth.sh "${GEOSERVER_DATA_DIR}/security/role/geonode REST role service/config.xml" "${GEOSERVER_DATA_DIR}/security/role/geonode REST role service/" ${TAGNAME[@]} > /dev/null 2>&1
 
 # set oauth2 filter tagname
 TAGNAME=( "cliendId" "clientSecret" "accessTokenUri" "userAuthorizationUri" "redirectUri" "checkTokenEndpointUrl" "logoutUri" )
@@ -175,7 +197,7 @@ TAGNAME=( "cliendId" "clientSecret" "accessTokenUri" "userAuthorizationUri" "red
 # backup geonode-oauth2 config.xml
 cp ${GEOSERVER_DATA_DIR}/security/filter/geonode-oauth2/config.xml ${GEOSERVER_DATA_DIR}/security/filter/geonode-oauth2/config.xml.orig
 # run the setting script for geonode-oauth2
-/usr/local/tomcat/tmp/set_geoserver_auth.sh ${GEOSERVER_DATA_DIR}/security/filter/geonode-oauth2/config.xml ${GEOSERVER_DATA_DIR}/security/filter/geonode-oauth2/ "${TAGNAME[@]}" > /dev/null 2>&1
+/usr/local/bin/set_geoserver_auth.sh ${GEOSERVER_DATA_DIR}/security/filter/geonode-oauth2/config.xml ${GEOSERVER_DATA_DIR}/security/filter/geonode-oauth2/ "${TAGNAME[@]}" > /dev/null 2>&1
 
 # set global tagname
 TAGNAME=( "proxyBaseUrl" )
@@ -183,29 +205,24 @@ TAGNAME=( "proxyBaseUrl" )
 # backup global.xml
 cp ${GEOSERVER_DATA_DIR}/global.xml ${GEOSERVER_DATA_DIR}/global.xml.orig
 # run the setting script for global configuration
-/usr/local/tomcat/tmp/set_geoserver_auth.sh ${GEOSERVER_DATA_DIR}/global.xml ${GEOSERVER_DATA_DIR}/ ${TAGNAME[@]} > /dev/null 2>&1
-
-# set correct amqp broker url
-sed -i -e 's/localhost/rabbitmq/g' ${GEOSERVER_DATA_DIR}/notifier/notifier.xml
+/usr/local/bin/set_geoserver_auth.sh ${GEOSERVER_DATA_DIR}/global.xml ${GEOSERVER_DATA_DIR}/ ${TAGNAME[@]} > /dev/null 2>&1
 
 # exclude wrong dependencies
 sed -i -e 's/xom-\*\.jar/xom-\*\.jar,bcprov\*\.jar/g' /usr/local/tomcat/conf/catalina.properties
 
-# J2 templating for this docker image we should also do it for other configuration files in /usr/local/tomcat/tmp
+# templating for this docker image we should also do it for other configuration files in /usr/local/tomcat/tmp
 
 declare -a geoserver_datadir_template_dirs=("geofence")
 
-for template in in ${geoserver_datadir_template_dirs[*]}; do
-    #Geofence templates
+for template in ${geoserver_datadir_template_dirs[*]}; do
     if [ "$template" == "geofence" ]; then
-      cp -R /templates/$template/* ${GEOSERVER_DATA_DIR}/geofence
+        cp -vR $GEOSERVER_SHARE_DIR/templates/$template/* ${GEOSERVER_DATA_DIR}/geofence
 
-      for f in $(find ${GEOSERVER_DATA_DIR}/geofence/ -type f -name "*.j2"); do
-          echo -e "Evaluating template\n\tSource: $f\n\tDest: ${f%.j2}"
-          /usr/local/bin/j2 $f > ${f%.j2}
-          rm -f $f
-      done
-
+        for f in $(find ${GEOSERVER_DATA_DIR}/geofence/ -type f -name "*.envsubst"); do
+            echo -e "Evaluating template\n\tSource: $f\n\tDest: ${f%.envsubst}"
+            envsubst < "$f" > "${f%.envsubst}"        
+            rm -vf "$f"
+        done
     fi
 done
 
@@ -240,10 +257,10 @@ if [ "${GEOSERVER_CORS_ENABLED}" = "true" ] || [ "${GEOSERVER_CORS_ENABLED}" = "
   fi
 fi
 
-if [ ${FORCE_REINIT} = "true" ]  || [ ${FORCE_REINIT} = "True" ] || [ ! -e "${GEOSERVER_DATA_DIR}/geoserver_init.lock" ]; then
-    # Run async configuration, it needs Geoserver to be up and running
-    # executes step configure-geoserver from task.py file
-    nohup sh -c "invoke configure-geoserver" &
+
+if [ "${FORCE_REINIT}" = "true" ] || [ "${FORCE_REINIT}" = "True" ] || [ ! -e "${GEOSERVER_DATA_DIR}/geoserver_init.lock" ]; then
+    # Run async configuration, it needs GeoServer to be up and running
+    nohup /usr/local/bin/configure_geoserver.sh &
 fi
 
 # start tomcat
