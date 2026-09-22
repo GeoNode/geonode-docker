@@ -3,11 +3,17 @@
 auth_conf_source="$1"
 auth_conf_target="$2"
 # Creating a temporary file for sed to write the changes to
-temp_file="xml.tmp"
-touch $temp_file
+# Use mktemp so the temp file lands in a writable location ($TMPDIR, default
+# /tmp) instead of the current working directory, which may not be writable
+# when the image runs as a non-root user.
+temp_file="$(mktemp)"
+trap 'rm -f "$temp_file"' EXIT
 
-source /root/.bashrc
-source /root/.override_env
+# Use "${GEOSERVER_HOME}" (default /root for backward compatibility) so the
+# environment written by entrypoint.sh is picked up regardless of the home dir.
+GEOSERVER_HOME="${GEOSERVER_HOME:-/root}"
+[ -f "${GEOSERVER_HOME}/.bashrc" ] && source "${GEOSERVER_HOME}/.bashrc"
+[ -f "${GEOSERVER_HOME}/.override_env" ] && source "${GEOSERVER_HOME}/.override_env"
 
 test -z "$auth_conf_source" && echo "You must specify a source file" && exit 1
 test -z "$auth_conf_target" && echo "You must specify a target conf directory" && exit 1
@@ -81,12 +87,15 @@ do
     # Match the whole element (empty or not); only the tag name is interpolated,
     # so the user-controlled content goes through the escapers.
     new_esc=`escape_replacement "$newvalue"`
-    sed -E "s@(<$i>)[^<]*(</$i>)@\1${new_esc}\2@g" "$auth_conf_source" > "$temp_file"
-    cp "$temp_file" "$auth_conf_source"
+    if ! sed -E "s@(<$i>)[^<]*(</$i>)@\1${new_esc}\2@g" "$auth_conf_source" > "$temp_file"; then
+        echo "ERROR: failed to write temporary file '$temp_file'" >&2
+        exit 1
+    fi
+    if ! cp "$temp_file" "$auth_conf_source"; then
+        echo "ERROR: failed to write back to '$auth_conf_source'" >&2
+        exit 1
+    fi
 done
-# Writing our changes back to the original file ($auth_conf_source)
-# no longer needed
-# mv $temp_file $auth_conf_source
 
 echo "DEBUG: Finished... [Ok] --- Final xml file is \n"
 cat "$auth_conf_source"
