@@ -15,7 +15,7 @@ services:
     restart: on-failure
 
   geoserver:
-    image: geonode/geoserver:2.28.4-latest
+    image: geonode/geoserver:2.28.x-latest
     build:
       context: .
     links:
