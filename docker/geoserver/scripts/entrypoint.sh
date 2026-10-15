@@ -191,13 +191,11 @@ cp "${GEOSERVER_DATA_DIR}/security/role/geonode REST role service/config.xml" "$
 # run the setting script for geonode REST role service
 /usr/local/bin/set_geoserver_auth.sh "${GEOSERVER_DATA_DIR}/security/role/geonode REST role service/config.xml" "${GEOSERVER_DATA_DIR}/security/role/geonode REST role service/" ${TAGNAME[@]} > /dev/null 2>&1
 
-# set oauth2 filter tagname
-TAGNAME=( "cliendId" "clientSecret" "accessTokenUri" "userAuthorizationUri" "redirectUri" "checkTokenEndpointUrl" "logoutUri" )
-
-# backup geonode-oauth2 config.xml
-cp ${GEOSERVER_DATA_DIR}/security/filter/geonode-oauth2/config.xml ${GEOSERVER_DATA_DIR}/security/filter/geonode-oauth2/config.xml.orig
-# run the setting script for geonode-oauth2
-/usr/local/bin/set_geoserver_auth.sh ${GEOSERVER_DATA_DIR}/security/filter/geonode-oauth2/config.xml ${GEOSERVER_DATA_DIR}/security/filter/geonode-oauth2/ "${TAGNAME[@]}" > /dev/null 2>&1
+# configure geonode-oidc filter from template
+mkdir -p "${GEOSERVER_DATA_DIR}/security/filter/geonode-oidc"
+envsubst '${SITEURL} ${OAUTH2_CLIENT_ID} ${OAUTH2_CLIENT_SECRET} ${GEONODE_LB_HOST_IP} ${GEONODE_LB_PORT}' \
+  < "${GEOSERVER_SHARE_DIR}/templates/oidc/config.xml.envsubst" \
+  > "${GEOSERVER_DATA_DIR}/security/filter/geonode-oidc/config.xml"
 
 # set global tagname
 TAGNAME=( "proxyBaseUrl" )
