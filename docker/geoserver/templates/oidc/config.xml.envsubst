@@ -1,0 +1,32 @@
+<oauth2LoginAuthentication>
+  <id>-685f9143:1a13a05b6df:-8000</id>
+  <name>geonode-oidc</name>
+  <className>org.geoserver.security.oauth2.login.GeoServerOAuth2LoginAuthenticationFilter</className>
+  <roleSource class="org.geoserver.security.config.PreAuthenticatedUserNameFilterConfig$PreAuthenticatedUserNameRoleSource">RoleService</roleSource>
+  <roleServiceName>geonode REST role service</roleServiceName>
+  <baseRedirectUri>${SITEURL}geoserver/</baseRedirectUri>
+  <oidcEnabled>true</oidcEnabled>
+  <oidcClientId>${OAUTH2_CLIENT_ID}</oidcClientId>
+  <oidcClientSecret>${OAUTH2_CLIENT_SECRET}</oidcClientSecret>
+  <oidcUserNameAttribute>preferred_username</oidcUserNameAttribute>
+  <oidcRedirectUri>${SITEURL}geoserver/web/login/oauth2/code/oidc</oidcRedirectUri>
+  <oidcScopes>openid</oidcScopes>
+  <oidcTokenUri>http://${GEONODE_LB_HOST_IP}:${GEONODE_LB_PORT}/o/token/</oidcTokenUri>
+  <oidcAuthorizationUri>${SITEURL}o/authorize/</oidcAuthorizationUri>
+  <oidcUserInfoUri>http://${GEONODE_LB_HOST_IP}:${GEONODE_LB_PORT}/o/userinfo/</oidcUserInfoUri>
+  <oidcJwkSetUri>http://${GEONODE_LB_HOST_IP}:${GEONODE_LB_PORT}/o/.well-known/jwks.json</oidcJwkSetUri>
+  <oidcLogoutUri>${SITEURL}account/logout/</oidcLogoutUri>
+  <oidcIntrospectionUrl>http://${GEONODE_LB_HOST_IP}:${GEONODE_LB_PORT}/o/introspect/</oidcIntrospectionUrl>
+  <oidcForceAuthorizationUriHttps>false</oidcForceAuthorizationUriHttps>
+  <oidcForceTokenUriHttps>false</oidcForceTokenUriHttps>
+  <oidcUsePKCE>false</oidcUsePKCE>
+  <oidcAuthenticationMethodPostSecret>true</oidcAuthenticationMethodPostSecret>
+  <disableSignatureValidation>false</disableSignatureValidation>
+  <oidcAllowUnSecureLogging>false</oidcAllowUnSecureLogging>
+  <postLogoutRedirectUri>${SITEURL}geoserver/web/</postLogoutRedirectUri>
+  <enableRedirectAuthenticationEntryPoint>false</enableRedirectAuthenticationEntryPoint>
+  <enableResourceServerMode>true</enableResourceServerMode>
+  <validateTokenAudience>false</validateTokenAudience>
+  <validateTokenAudienceClaimName>aud</validateTokenAudienceClaimName>
+  <onlyExternalListedRoles>false</onlyExternalListedRoles>
+</oauth2LoginAuthentication>
