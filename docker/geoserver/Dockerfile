@@ -1,4 +1,4 @@
-ARG IMAGE_VERSION=9.0.122-jdk17-temurin-jammy
+ARG IMAGE_VERSION=9.0.123-jdk17-temurin-jammy
 FROM tomcat:$IMAGE_VERSION
 
 ARG GEOSERVER_VERSION=2.28.x
@@ -17,6 +17,10 @@ ENV GEOSERVER_CORS_ALLOWED_METHODS=$GEOSERVER_CORS_ALLOWED_METHODS
 ENV GEOSERVER_CORS_ALLOWED_HEADERS=$GEOSERVER_CORS_ALLOWED_HEADERS
 
 RUN apt-get update -y && apt-get -y install --no-install-recommends curl wget unzip procps less gettext-base && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update -y \
+   && apt-get -y install --no-install-recommends curl wget unzip procps less gettext-base \
+   && rm -rf /var/lib/apt/lists/*
 
 #
 # Download and install GeoServer

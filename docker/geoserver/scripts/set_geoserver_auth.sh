@@ -55,13 +55,9 @@ escape_replacement() {
 for i in "${tagname[@]}"
 do
     echo "DEBUG: Working on '$auth_conf_source' for tagname <$i>"
-    # Extracting the value from the <$tagname> element
-    # echo -ne "<$i>$tagvalue</$i>" | xmlstarlet sel -t -m "//a" -v . -n
-    tagvalue=`grep "<$i>.*<.$i>" "$auth_conf_source" | sed -e "s/^.*<$i/<$i/" | cut -f2 -d">"| cut -f1 -d"<"`
-
+    tagvalue=`grep "<$i>.*<.$i>" "$auth_conf_source" | sed -e "s/^.*<$i/<$i/" | cut -f2 -d">" | cut -f1 -d"<"`
     echo "DEBUG: Found the current value for the element <$i> - '$tagvalue'"
 
-    # Setting new substituted value
     case $i in
         authApiKey)
             newvalue="$OAUTH2_API_KEY";;
