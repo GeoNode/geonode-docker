@@ -1,5 +1,5 @@
 FROM alpine:latest
-ARG GEOSERVER_VERSION=2.28.5
+ARG GEOSERVER_VERSION=2.28.6
 LABEL GeoNode development team
 
 # Install curl in alpine 3.3+
