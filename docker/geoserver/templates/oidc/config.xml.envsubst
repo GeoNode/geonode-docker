@@ -2,8 +2,9 @@
   <id>-685f9143:1a13a05b6df:-8000</id>
   <name>geonode-oidc</name>
   <className>org.geoserver.security.oauth2.login.GeoServerOAuth2LoginAuthenticationFilter</className>
-  <roleSource class="org.geoserver.security.config.PreAuthenticatedUserNameFilterConfig$PreAuthenticatedUserNameRoleSource">RoleService</roleSource>
+  <roleSource class="org.geoserver.security.oauth2.config.OpenIdRoleSource">UserInfo</roleSource>
   <roleServiceName>geonode REST role service</roleServiceName>
+  <tokenRolesClaim>roles</tokenRolesClaim>
   <baseRedirectUri>${SITEURL}geoserver/</baseRedirectUri>
   <oidcEnabled>true</oidcEnabled>
   <oidcClientId>${OAUTH2_CLIENT_ID}</oidcClientId>

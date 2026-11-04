@@ -191,11 +191,38 @@ cp "${GEOSERVER_DATA_DIR}/security/role/geonode REST role service/config.xml" "$
 # run the setting script for geonode REST role service
 /usr/local/bin/set_geoserver_auth.sh "${GEOSERVER_DATA_DIR}/security/role/geonode REST role service/config.xml" "${GEOSERVER_DATA_DIR}/security/role/geonode REST role service/" ${TAGNAME[@]} > /dev/null 2>&1
 
+# GeoServer 3 removed the GeoFence authentication provider, move older config out of security/auth (kept as backup)
+GEOFENCE_AUTH_DIR="${GEOSERVER_DATA_DIR}/security/auth/geofence"
+if [ -d "${GEOFENCE_AUTH_DIR}" ]; then
+    echo "Moving GeoFence auth provider config to security/geofence-auth.pre-gs3"
+    mv "${GEOFENCE_AUTH_DIR}" "${GEOSERVER_DATA_DIR}/security/geofence-auth.pre-gs3"
+fi
+
+# use geonode-oidc instead of the removed geonode-oauth2 filter in existing filter chains,
+# drop the old geonode-oauth2 login/logout paths and the removed GeoFence auth provider
+SECURITY_CONFIG="${GEOSERVER_DATA_DIR}/security/config.xml"
+if grep -qE "<filter>geonode-oauth2</filter>|<string>geofence</string>" "${SECURITY_CONFIG}"; then
+    echo "Updating ${SECURITY_CONFIG} for GeoServer 3 (backup: config.xml.pre-gs3)"
+    cp -n "${SECURITY_CONFIG}" "${SECURITY_CONFIG}.pre-gs3"
+    sed -i -e 's#<filter>geonode-oauth2</filter>#<filter>geonode-oidc</filter>#g' \
+           -e 's#,/j_spring_oauth2_geonode_[a-z]*/\?##g' \
+           -e '/<authProviderNames>/,/<\/authProviderNames>/{/<string>geofence<\/string>/d}' \
+           "${SECURITY_CONFIG}"
+fi
+
+# GeoServer 3 removed the geonode-oauth2 plugin, move the old filter config out of security/filter (kept as backup)
+GEONODE_OAUTH2_FILTER_DIR="${GEOSERVER_DATA_DIR}/security/filter/geonode-oauth2"
+if [ -d "${GEONODE_OAUTH2_FILTER_DIR}" ]; then
+    echo "Moving geonode-oauth2 filter config to security/geonode-oauth2-filter.pre-gs3"
+    mv "${GEONODE_OAUTH2_FILTER_DIR}" "${GEOSERVER_DATA_DIR}/security/geonode-oauth2-filter.pre-gs3"
+fi
+
 # configure geonode-oidc filter from template
 mkdir -p "${GEOSERVER_DATA_DIR}/security/filter/geonode-oidc"
 envsubst '${SITEURL} ${OAUTH2_CLIENT_ID} ${OAUTH2_CLIENT_SECRET} ${GEONODE_LB_HOST_IP} ${GEONODE_LB_PORT}' \
   < "${GEOSERVER_SHARE_DIR}/templates/oidc/config.xml.envsubst" \
   > "${GEOSERVER_DATA_DIR}/security/filter/geonode-oidc/config.xml"
+
 
 # set global tagname
 TAGNAME=( "proxyBaseUrl" )
