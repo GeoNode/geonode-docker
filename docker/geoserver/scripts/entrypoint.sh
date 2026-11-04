@@ -224,6 +224,16 @@ envsubst '${SITEURL} ${OAUTH2_CLIENT_ID} ${OAUTH2_CLIENT_SECRET} ${GEONODE_LB_HO
   > "${GEOSERVER_DATA_DIR}/security/filter/geonode-oidc/config.xml"
 
 
+# GeoServer 3 reads geofence/geofence.properties, move the old geofence-server.properties over it (both kept as backup)
+GEOFENCE_DIR="${GEOSERVER_DATA_DIR}/geofence"
+if [ -f "${GEOFENCE_DIR}/geofence-server.properties" ]; then
+    echo "Moving geofence-server.properties to geofence.properties for GeoServer 3 (backups: *.pre-gs3)"
+    cp "${GEOFENCE_DIR}/geofence-server.properties" "${GEOFENCE_DIR}/geofence-server.properties.pre-gs3"
+    cp "${GEOFENCE_DIR}/geofence.properties" "${GEOFENCE_DIR}/geofence.properties.pre-gs3" 2>/dev/null || true
+    mv "${GEOFENCE_DIR}/geofence-server.properties" "${GEOFENCE_DIR}/geofence.properties"
+fi
+
+
 # set global tagname
 TAGNAME=( "proxyBaseUrl" )
 
