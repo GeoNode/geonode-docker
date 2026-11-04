@@ -1,0 +1,5 @@
+geofence.datasource.url=jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${GEONODE_GEODATABASE}?ApplicationName=GeoFence
+geofence.datasource.username=${GEONODE_GEODATABASE_USER}
+geofence.datasource.password=${GEONODE_GEODATABASE_PASSWORD}
+geofence.datasource.driver=org.postgresql.Driver
+geofence.hibernate.default_schema=${GEONODE_GEODATABASE_SCHEMA}
