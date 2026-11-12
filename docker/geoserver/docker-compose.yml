@@ -1,64 +1,47 @@
 version: '3.9'
 
 services:
+
   postgis:
-    image: geonode/postgis:15.3-latest
-    environment:
-      POSTGRES_PASSWORD: postgres
+    image: geonode/postgis:13
+    ports:
+      - "25432:5432"
     volumes:
-     - pgdata:/var/lib/postgresql/data
+      - /srv/docker/geoserver/postgis:/var/lib/postgresql
+    #volumes_from:
+      #- pgstore
     healthcheck:
       test: "pg_isready -d postgres -U postgres"
     restart: on-failure
 
   geoserver:
-    image: geonode/geoserver:2.24.x
+    image: geonode/geoserver:2.28.x-latest
     build:
       context: .
-      args:
-        GEOSERVER_VERSION: 2.24.x
     links:
       - postgis
     ports:
       - "8080:8080"
     volumes:
-      - data:/geoserver_data/data
+      - geoserver_data_dir:/geoserver_data/data
     environment:
-      NGINX_BASE_URL: http://localhost
-      # GEOSERVER_CORS_ENABLED: true
-      # GEOSERVER_CORS_ALLOWED_ORIGINS: localhost
-      # GEOSERVER_CORS_ALLOWED_METHODS: GET,POST,PUT,DELETE,HEAD,OPTIONS
-      # GEOSERVER_CORS_ALLOWED_HEADERS: "*"
-      # INVOKE_LOG_STDOUT: false
-      # FORCE_REINIT: true
+      - NGINX_BASE_URL=http://localhost
+      # - GEOSERVER_CORS_ENABLED=true
+      # - FORCE_REINIT=true
+      # - GEOSERVER_HOME=/tmp
+    # Run rootless: any UID works, if the group is 0. Remove it to run as root.
+    user: "1000:0"
     depends_on:
       postgis:
         condition: service_healthy
-      data-dir-conf:
-        condition: service_healthy
-    user: '1000'
     healthcheck:
-      # geoserver can't test with rest, because it needs authorization.
+      # the REST API needs authentication, so check the web UI page
       test: curl --fail -s http://localhost:8080/geoserver/index.html || exit 1
-      interval: 30s
+      interval: 1m30s
       timeout: 10s
       retries: 3
     restart: on-failure
 
-  data-dir-conf:
-    image: geonode/geoserver_data:2.24.x
-    build:
-      context: ../geoserver_data
-      args:
-        GEOSERVER_VERSION: 2.24.x
-    command: ["sleep", "infinity"]
-    volumes:
-      - data:/geoserver_data/data
-    healthcheck:
-      test: "ls -A '/geoserver_data/data' | wc -l"
-    restart: on-failure
-
 volumes:
   # reference to the named data container that holds the preloaded geoserver data directory
-  data:
-  pgdata:
+  geoserver_data_dir:
