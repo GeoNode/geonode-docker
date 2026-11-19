@@ -9,6 +9,7 @@ events {
 
 http {
     server_names_hash_bucket_size  64;
+    server_tokens off;
     http2 $HTTP2_TOGGLE;
 
     # HSTS is sent only over https and only if HSTS_HEADER is set
