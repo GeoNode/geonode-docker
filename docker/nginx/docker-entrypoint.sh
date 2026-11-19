@@ -50,6 +50,7 @@ fi
 
 export HTTP_VERSION=${HTTP_VERSION:-2}
 export HTTP2_TOGGLE=$([ "$HTTP_VERSION" = "2" ] && echo "on" || echo "off")
+export HSTS_HEADER=${HSTS_HEADER:-}
 export HTTP_SCHEME=${HTTP_SCHEME:-http}
 export GEONODE_LB_HOST_IP=${GEONODE_LB_HOST_IP:-django}
 export GEONODE_LB_PORT=${GEONODE_LB_PORT:-8000}

@@ -20,6 +20,9 @@ fastcgi_hide_header Set-Cookie;
 
 etag on;
 
+# add_header is not inherited by blocks that set their own, so HSTS is repeated there
+add_header Strict-Transport-Security $hsts_header always;
+
 # compression
 gzip on;
 gzip_vary on;
@@ -73,6 +76,7 @@ location /static/ {
       gzip_static always;
       expires 30d;
       access_log off;
+      add_header Strict-Transport-Security $hsts_header always;
       add_header Pragma "public";
       add_header Cache-Control "max-age=31536000, public";
   }
@@ -85,6 +89,7 @@ location /uploaded/ {
       gzip_static always;
       expires 30d;
       access_log off;
+      add_header Strict-Transport-Security $hsts_header always;
       add_header Pragma "public";
       add_header Cache-Control "max-age=31536000, public";
   }
@@ -96,6 +101,7 @@ location / {
   set $upstream $GEONODE_LB_HOST_IP:$GEONODE_LB_PORT;
 
   if ($request_method = OPTIONS) {
+      add_header Strict-Transport-Security $hsts_header always;
       add_header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, OPTIONS";
       add_header Access-Control-Allow-Headers "Authorization, Content-Type, Accept";
       add_header Access-Control-Allow-Credentials true;
@@ -105,6 +111,7 @@ location / {
       return 200;
   }
 
+  add_header Strict-Transport-Security $hsts_header always;
   add_header Access-Control-Allow-Credentials false;
   add_header Access-Control-Allow-Headers "Content-Type, Accept, Authorization, Origin, User-Agent";
   add_header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, OPTIONS";
@@ -133,6 +140,7 @@ location / {
       gzip_static always;
       expires 30d;
       access_log off;
+      add_header Strict-Transport-Security $hsts_header always;
       add_header Pragma "public";
       add_header Cache-Control "max-age=31536000, public";
   }
